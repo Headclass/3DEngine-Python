@@ -15,7 +15,7 @@ def drawLine(x1, y1, x2, y2, color):
     chan = 0
     dx = x2 - x1
     dy = y2 - y1
-    if (dx != 0 and dy != 0):
+    if (dx != 0 and dy != 0): #Controlling, if the line to be drawn is not a point or a line parallel to x or y axis.
         if (abs(dy) > abs(dx)):
             x1, y1 = y1,x1
             x2, y2 = y2, x2
@@ -81,18 +81,18 @@ def transpose(vertex):
 #Our cube is in its model space. We want to put it onto our scene, while rotating it a bit and moving it further away from the camera.
 #model space->world space
 
-#Model matrix
-
+#Rotation angles
 xangle = math.radians(69)
 yangle = math.radians(39)
 zangle = math.radians(0)
 
-#Rotation around the Y axis
+#Rotation matrices
 xRotationMatrix = numpy.array([[1, 0, 0, 0], [0,  math.cos(xangle), -math.sin(xangle), 0],[0, math.sin(xangle), math.cos(xangle), 0],[0,0,0,1]])
 yRotationMatrix = numpy.array([[math.cos(yangle), 0, math.sin(yangle), 0], [0, 1, 0, 0],[-math.sin(yangle), 0, math.cos(yangle), 0],[0,0,0,1]])
 zRotationMatrix = numpy.array([[math.cos(zangle), -math.sin(zangle), 0, 0], [math.sin(zangle), math.cos(zangle), 0, 0],[0, 0, 1, 0],[0,0,0,1]])
 #Translation along the negative Z axis
 TranslationMatrix = numpy.array([[1, 0, 0, 0], [0, 1, 0, 0],[0, 0, 1, -6],[0,0,0,1]])
+#Combining the transformations into one model matrix
 ModelMatrix = numpy.dot(yRotationMatrix,xRotationMatrix)
 ModelMatrix = numpy.dot(zRotationMatrix,ModelMatrix)
 ModelMatrix=numpy.dot(TranslationMatrix,ModelMatrix)
@@ -112,30 +112,29 @@ ViewMatrix = numpy.array([[1, 0, 0, 0], [0, 1, 0, 0],[0, 0, 1, 3],[0,0,0,1]])
 def worldToView(vertex):
     return numpy.dot(ViewMatrix,vertex)
 
-#Mame umiestnenu kameru a mame umiestnenu kocku. Teraz potrebujeme vysledny obraz zobrazit na platno.
-#Nasleduje maticovy prevod view space->clip space
+#Now we need to apply the projection matrix to create perspective.
+#view space->clip space
 
 #Projection matrix
 ProjectionMatrix = numpy.array([[0.8,0,0,0], [0,0.8,0,0],[0,0,-1.22,-2.22],[0,0,-1,0]])
 #ProjectionMatrix = numpy.array([[0.25,0,0,0], [0,0.25,0,0],[0,0,-0.22,-1.22],[0,0,0,1]])
-
 def viewToClip(vertex):
     return numpy.dot(ProjectionMatrix,vertex)
 
 
-#Teraz musime vydelit suradnice vsetkych bodov ich W hodnotami (Perspective division)
+#In order to turn the resulting coordinates into NDC, we need to divide by W.
 def perspectiveDivision(vertex):
     for j in range(4):
         vertex[j]=vertex[j]/vertex[3]
     return vertex
 
-#Teraz musime previest na samotne pixely (Viewport transformation)
+#Turning values from -1 to 1 into individual pixels on the screen
 def viewportTransformation(vertex):
     vertex[0] = (vertex[0] * 0.5 + 0.5) * width
     vertex[1] = (vertex[1] * 0.5 + 0.5) * height
     return vertex
 
-#A nakoniec sa zbavime skaredych desatinnych miest zaokruhlovanim na najblizsi pixel.
+#Rounding the resulting values
 def roundPixel(vertex):
     vertex[0]=  int(round(vertex[0][0]))
     vertex[1] = int(round(vertex[1][0]))
