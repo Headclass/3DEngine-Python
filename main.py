@@ -154,6 +154,7 @@ cubeMesh=[
 ]
 
 
+
 #An empty triangle
 Triangle=[[0,0],[0,0],[0,0]]
 
@@ -173,7 +174,7 @@ for i in range(len(cubeMesh)):
     cubeMesh[i]=roundPixel(cubeMesh[i])                #Rounding the resulting values to nearest pixel
     Triangle[i%3][0] = int(cubeMesh[i][0])
     Triangle[i%3][1] = int(cubeMesh[i][1])
-    if i%3==2: #mame trojuholnik
+    if i%3==2:
         drawTriangle(Triangle,colors[counter%12])
         counter+=1
 img.show()
