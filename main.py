@@ -10,10 +10,10 @@ height = 800
 cnv = tkinter.Canvas(bg='white', width=width, height=height)
 
 #Triangle rasterization
-def drawTriangle(triangle):
-    cnv.create_line(triangle[0][0],height-triangle[0][1],triangle[1][0],height-triangle[1][1])
-    cnv.create_line(triangle[1][0],height-triangle[1][1],triangle[2][0],height-triangle[2][1])
-    cnv.create_line(triangle[2][0],height-triangle[2][1],triangle[0][0],height-triangle[0][1])
+def drawTriangle(triangle,color):
+    cnv.create_line(triangle[0][0],height-triangle[0][1],triangle[1][0],height-triangle[1][1],fill=color)
+    cnv.create_line(triangle[1][0],height-triangle[1][1],triangle[2][0],height-triangle[2][1],fill=color)
+    cnv.create_line(triangle[2][0],height-triangle[2][1],triangle[0][0],height-triangle[0][1],fill=color)
     #cnv.create_polygon(triangle[0][0],height-triangle[0][1],triangle[1][0],height-triangle[1][1],triangle[2][0],height-triangle[2][1],fill='white',outline='black')
 
 #Adding a homogenous coordinate (w)
@@ -176,6 +176,7 @@ cubeMesh=[
 [-0.25, 0.0, 0.5],
 [0.25, 0., 0.5],
 [0.25, 0.5, 0.5],
+
 [-0.25, 0., 0.5],
 [0.25, 0.5, 0.5],
 [-0.25, 0.5, 0.5],
@@ -196,7 +197,20 @@ cubeMesh=[
 
 [-0.5, 1, 0.5],
 [0.5, 1, 0.5],
-[0., 2., 0.0]
+[0., 2., 0.0],
+
+[0, 0, 0],
+[1, 0, 0], #17
+[0, 0, 0],
+
+[0, 0, 0],
+[0, 1, 0], #18
+[0, 0, 0],
+
+[0, 0, 0],
+[0, 0, 1], #19
+[0, 0, 0]
+
 ]
 
 
@@ -204,7 +218,7 @@ cubeMesh=[
 Triangle=[[0,0,0],[0,0,0],[0,0,0]]
 
 #Colors
-colors = [(255,0,0),(255,0,0),(0,255,0),(0,255,0),(0,0,255),(0,0,255),(255,255,0),(255,255,0),(0,255,255),(0,255,255),(255,0,255),(255,0,255)]
+colors = ['aquamarine','maroon','gold','yellow','coral','blue','red','cyan','gainsboro','green','black','bisque','lavender','linen','tomato','turquoise']
 
 #Triangle counter
 counter=0
@@ -221,7 +235,8 @@ j=0
 def update():
         cnv.delete("all")
         updateView()
-        global j
+        global j,counter,colors
+        counter=0
         for i in range(len(cubeMesh)):
             changingMesh[i]=modelToWorld(cubeMesh[i],0,0,0)              #Moving our model to its place on world coordinates
             changingMesh[i]=worldToView(changingMesh[i])               #Moving the world relative to our camera ("moving" the camera)
@@ -231,9 +246,20 @@ def update():
             changingMesh[i] = roundPixel(changingMesh[i])  # Rounding the resulting values to nearest pixel
             Triangle[i%3][0] = int(changingMesh[i][0])
             Triangle[i%3][1] = int(changingMesh[i][1])
-            Triangle[i % 3][2] = int(changingMesh[i][2])
+            Triangle[i%3][2] = int(changingMesh[i][2])
             if i%3==2:
-                drawTriangle(Triangle)
+                counter+=1
+                if counter<17:
+                    drawTriangle(Triangle,'black')
+                else:
+                    if counter==17:
+                        drawTriangle(Triangle, 'red')
+                    if counter==18:
+                        drawTriangle(Triangle, 'green')
+                    if counter==19:
+                        drawTriangle(Triangle, 'blue')
+
+
         j+=1
         if j == 5*365:
             j=0
