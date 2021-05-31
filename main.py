@@ -10,11 +10,10 @@ height = 800
 cnv = tkinter.Canvas(bg='white', width=width, height=height)
 
 #Triangle rasterization
-def drawTriangle(triangle,color):
-    cnv.create_line(triangle[0][0],height-triangle[0][1],triangle[1][0],height-triangle[1][1],fill=color)
-    cnv.create_line(triangle[1][0],height-triangle[1][1],triangle[2][0],height-triangle[2][1],fill=color)
-    cnv.create_line(triangle[2][0],height-triangle[2][1],triangle[0][0],height-triangle[0][1],fill=color)
-    #cnv.create_polygon(triangle[0][0],height-triangle[0][1],triangle[1][0],height-triangle[1][1],triangle[2][0],height-triangle[2][1],fill='white',outline='black')
+def drawTriangle(triangle,color,width):
+    cnv.create_line(triangle[0][0],height-triangle[0][1],triangle[1][0],height-triangle[1][1],fill=color,width=width)
+    cnv.create_line(triangle[1][0],height-triangle[1][1],triangle[2][0],height-triangle[2][1],fill=color,width=width)
+    cnv.create_line(triangle[2][0],height-triangle[2][1],triangle[0][0],height-triangle[0][1],fill=color,width=width)
 
 #Adding a homogenous coordinate (w)
 def homogenous(vertex):
@@ -47,7 +46,7 @@ def modelToWorld(vertex,x,y,z):
         [[math.cos(zangle), -math.sin(zangle), 0, 0], [math.sin(zangle), math.cos(zangle), 0, 0], [0, 0, 1, 0],
          [0, 0, 0, 1]])
     # Translation along the negative Z axis
-    TranslationMatrix = numpy.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, -6], [0, 0, 0, 1]])
+    TranslationMatrix = numpy.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
     # Combining the transformations into one model matrix
     ModelMatrix = numpy.dot(yRotationMatrix, xRotationMatrix)
     ModelMatrix = numpy.dot(zRotationMatrix, ModelMatrix)
@@ -63,7 +62,7 @@ def modelToWorld(vertex,x,y,z):
 #Applying the transformation to all of our vertexes
 xcam, ycam, zcam = 0, 0, 0
 camXangle, camYangle, camZangle = 0, 0, 0
-ViewMatrix = numpy.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+ViewMatrix = numpy.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, -6], [0, 0, 0, 1]])
 
 
 def updateView():
@@ -148,6 +147,7 @@ cubeMesh=[
 [0.5, 1., -0.5],
 [0.5, 0., 0.5],
 
+#Roof
 [0.5, 1., -0.5],
 [0.5, 0., 0.5],
 [0.5, 1, 0.5],
@@ -186,22 +186,23 @@ cubeMesh=[
 [0.5, 1, 0.5],
 [0., 2., 0.0],
 
+]
+
 #Axes
+axes = [
     #x
 [0, 0, 0],
-[1, 0, 0],
+[2, 0, 0],
 [0, 0, 0],
     #y
 [0, 0, 0],
-[0, 1, 0],
+[0, 2, 0],
 [0, 0, 0],
     #z
 [0, 0, 0],
-[0, 0, 1],
+[0, 0, 2],
 [0, 0, 0]
-
 ]
-
 
 #An empty triangle
 Triangle=[[0,0,0],[0,0,0],[0,0,0]]
@@ -216,8 +217,12 @@ for i in range(len(cubeMesh)):
     homogenous(cubeMesh[i])               # Adding a homogenous coordinate
     cubeMesh[i] = transpose(cubeMesh[i])  # Changing a row vector to a column vector
 
+for i in range(len(axes)):
+    homogenous(axes[i])               # Adding a homogenous coordinate
+    axes[i] = transpose(axes[i])  # Changing a row vector to a column vector
 
 changingMesh = cubeMesh.copy()
+changingAxes = axes.copy()
 j=0
 def update():
         cnv.delete("all")
@@ -225,7 +230,7 @@ def update():
         global j,counter,colors
         counter=0
         for i in range(len(cubeMesh)):
-            changingMesh[i]=modelToWorld(cubeMesh[i],0,0,0)              #Moving our model to its place on world coordinates
+            changingMesh[i]=modelToWorld(cubeMesh[i],0,j,0)              #Moving our model to its place on world coordinates
             changingMesh[i]=worldToView(changingMesh[i])               #Moving the world relative to our camera ("moving" the camera)
             changingMesh[i]=viewToClip(changingMesh[i])                #Applying projection
             changingMesh[i] = perspectiveDivision(changingMesh[i])  # Dividing by W to get to normalised device coordinates
@@ -236,21 +241,32 @@ def update():
             Triangle[i%3][2] = int(changingMesh[i][2])
             if i%3==2:
                 counter+=1
-                if counter<17:
-                    drawTriangle(Triangle,'black')
-                else:
-                    if counter==17:
-                        drawTriangle(Triangle, 'red')
-                    if counter==18:
-                        drawTriangle(Triangle, 'green')
-                    if counter==19:
-                        drawTriangle(Triangle, 'blue')
+                drawTriangle(Triangle,'black',1)
+
+        for i in range(len(axes)):
+            changingAxes[i]=modelToWorld(axes[i],0,0,0)              #Moving our model to its place on world coordinates
+            changingAxes[i]=worldToView(changingAxes[i])               #Moving the world relative to our camera ("moving" the camera)
+            changingAxes[i]=viewToClip(changingAxes[i])                #Applying projection
+            changingAxes[i] = perspectiveDivision(changingAxes[i])  # Dividing by W to get to normalised device coordinates
+            changingAxes[i] = viewportTransformation(changingAxes[i])  # Changing the normalised device coordinates to pixels on the screen
+            changingMesh[i] = roundPixel(changingAxes[i])  # Rounding the resulting values to nearest pixel
+            Triangle[i%3][0] = int(changingAxes[i][0])
+            Triangle[i%3][1] = int(changingAxes[i][1])
+            Triangle[i%3][2] = int(changingAxes[i][2])
+            if i%3==2:
+                if i == 2:
+                    drawTriangle(Triangle,'red',3)
+                if i == 5 :
+                    drawTriangle(Triangle, 'green',3)
+                if i == 8 :
+                    drawTriangle(Triangle, 'blue',3)
+
 
 
         j+=1
-        if j == 5*365:
+        if j == 360:
             j=0
-        cnv.after(5,update)
+        cnv.after(10,update)
 
 update()
 def move(event):
