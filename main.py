@@ -103,7 +103,6 @@ ProjectionMatrix = numpy.array([[0.8,0,0,0], [0,0.8,0,0],[0,0,-1.22,-2.22],[0,0,
 def viewToClip(vertex):
     return numpy.dot(ProjectionMatrix,vertex)
 
-
 #In order to turn the resulting coordinates into NDC, we need to divide by W.
 def perspectiveDivision(vertex):
     for j in range(4):
@@ -122,25 +121,13 @@ def roundPixel(vertex):
     vertex[1] = int(round(vertex[1][0]))
     return vertex
 
-
-
-
-#Vertexes of cube triangles
-cubeMesh2=[
-                [-1,-1,-1],[1,-1,-1],[1,-1,1]  ,  [-1,-1,-1],[1,-1,1],[-1,-1,1], #TOP
-                [1,-1,-1],[1,1,-1],[1,1,1]     ,  [1,-1,-1],[1,1,1],[1,-1,1],    #RIGHT
-                [-1,1,-1],[-1,-1,-1],[-1,-1,1] ,  [-1,1,-1],[-1,-1,1],[-1,1,1],  #LEFT
-                [1,1,-1],[-1,1,-1],[-1,1,1]    ,  [1,1,-1],[-1,1,1],[1,1,1],     #BOTTOM
-                [-1,-1,1],[1,-1,1],[1,1,1]   ,  [-1,-1,1],[1,1,1],[-1,1,1],      #NEAR
-                [1,-1,-1],[-1,-1,-1],[-1,1,-1]  ,  [1,-1,-1],[-1,1,-1],[1,1,-1]  #FAR
-]
-
+#Vertexes of the object
 cubeMesh=[
+#Ground
 [-2, 0, -2],[2, 0, -2],[-2, 0, 2],
 [-2, 0, 2],[2, 0, -2],[2, 0, 2],
 
-
-
+#House
 [-0.5, 0., -0.5 ],
 [-0.5, 1., -0.5 ],
 [-0.5, 0, 0.5],
@@ -182,7 +169,7 @@ cubeMesh=[
 [-0.25, 0.5, 0.5],
 
 
-
+#Door
 [-0.5, 1., -0.5],
 [-0.5, 1., 0.5],
 [0., 2., 0.0],
@@ -199,16 +186,18 @@ cubeMesh=[
 [0.5, 1, 0.5],
 [0., 2., 0.0],
 
+#Axes
+    #x
 [0, 0, 0],
-[1, 0, 0], #17
+[1, 0, 0],
 [0, 0, 0],
-
+    #y
 [0, 0, 0],
-[0, 1, 0], #18
+[0, 1, 0],
 [0, 0, 0],
-
+    #z
 [0, 0, 0],
-[0, 0, 1], #19
+[0, 0, 1],
 [0, 0, 0]
 
 ]
@@ -218,10 +207,8 @@ cubeMesh=[
 Triangle=[[0,0,0],[0,0,0],[0,0,0]]
 
 #Colors
-colors = ['aquamarine','maroon','gold','yellow','coral','blue','red','cyan','gainsboro','green','black','bisque','lavender','linen','tomato','turquoise']
 
 #Triangle counter
-counter=0
 cnv.pack()
 
 
