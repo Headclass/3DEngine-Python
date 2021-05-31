@@ -9,11 +9,64 @@ height = 800
 #An empty canvas
 cnv = tkinter.Canvas(bg='white', width=width, height=height)
 
+def drawLine(x1, y1, x2, y2, color):
+    chan = 0
+    dx = x2 - x1
+    dy = y2 - y1
+    if (dx != 0 and dy != 0):
+        if (abs(dy) > abs(dx)):
+            x1, y1 = y1,x1
+            x2, y2 = y2, x2
+            dx = x2 - x1
+            dy = y2 - y1
+            chan = 1
+        if (x2 < x1):
+            x1, x2=x2, x1
+            dx = x2 - x1
+            y1,y2 = y2,y1
+            dy = y2 - y1
+
+        k = (dy << 8) / dx
+        y = y1 << 8
+        for x in range(x1,x2+1):
+            if (chan == 0):
+                try:
+                    cnv.create_line(x, int(y) >> 8,x+1,int(y) >> 8,fill=color)
+                except:
+                    return
+                y += k
+
+            else:
+                try:
+                    cnv.create_line(int(y) >> 8,x,(int(y) >> 8)+1,x,fill=color)
+                except:
+                    return
+                y += k
+    else:
+        if (dy == 0 and dx != 0):
+            if (x2 < x1):
+                x1, x2=x2, x1
+            for x in range(x1,x2+1):
+                if y1 < 0 or y1 > height-1 or x < 0 or x > width-1:
+                    return
+                cnv.create_line(x, y1, x+1, y1, fill=color)
+
+        if (dx == 0 and dy != 0):
+            if (y2 < y1):
+                y1,y2 = y2,y1
+            for y in range(y1, y2 + 1):
+                if x1 < 0 or x1 > height-1 or y < 0 or y > width-1:
+                    return
+                cnv.create_line(x1, y, x1+1, y, fill=color)
+
 #Triangle rasterization
 def drawTriangle(triangle,color,width):
     cnv.create_line(triangle[0][0],height-triangle[0][1],triangle[1][0],height-triangle[1][1],fill=color,width=width)
     cnv.create_line(triangle[1][0],height-triangle[1][1],triangle[2][0],height-triangle[2][1],fill=color,width=width)
     cnv.create_line(triangle[2][0],height-triangle[2][1],triangle[0][0],height-triangle[0][1],fill=color,width=width)
+    #drawLine(triangle[0][0],height-triangle[0][1],triangle[1][0],height-triangle[1][1],color)
+    #drawLine(triangle[1][0],height-triangle[1][1],triangle[2][0],height-triangle[2][1],color)
+    #drawLine(triangle[2][0],height-triangle[2][1],triangle[0][0],height-triangle[0][1],color)
 
 #Adding a homogenous coordinate (w)
 def homogenous(vertex):
@@ -291,6 +344,5 @@ def move(event):
 
 
 cnv.bind_all('<Key>', move)
-
 
 tkinter.mainloop()
