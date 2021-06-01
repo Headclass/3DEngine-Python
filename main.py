@@ -3,8 +3,8 @@ import math
 import tkinter
 
 #Window dimensions
-width = 800
-height = 800
+width = 1000
+height = 1000
 
 #An empty canvas
 cnv = tkinter.Canvas(bg='white', width=width, height=height)
@@ -352,8 +352,6 @@ def move(event):
         camZangle -= 4
     if event.char == 'o':
         camZangle +=4
-    if event.char == 'r':
-        print(ViewMatrix)
 
 
 cnv.bind_all('<Key>', move)
