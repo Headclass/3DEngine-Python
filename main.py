@@ -231,15 +231,15 @@ cubeMesh=[
 axes = [
     #x
 [0, 0, 0],
-[2, 0, 0],
+[0.7, 0, 0],
 [0, 0, 0],
     #y
 [0, 0, 0],
-[0, 2, 0],
+[0, 0.7, 0],
 [0, 0, 0],
     #z
 [0, 0, 0],
-[0, 0, 2],
+[0, 0, 0.7],
 [0, 0, 0]
 ]
 
@@ -268,10 +268,13 @@ def update():
         updateView()
         global j,counter,colors
         counter=0
+        outPoints=0
         for i in range(len(cubeMesh)):
-            changingMesh[i]=modelToWorld(cubeMesh[i],0,j,0)              #Moving our model to its place on world coordinates
+            changingMesh[i]=modelToWorld(cubeMesh[i],0,0,0)              #Moving our model to its place on world coordinates
             changingMesh[i]=worldToView(changingMesh[i])               #Moving the world relative to our camera ("moving" the camera)
             changingMesh[i]=viewToClip(changingMesh[i])                #Applying projection
+            if -changingMesh[i][3]>changingMesh[i][2]:
+                outPoints+=1
             changingMesh[i] = perspectiveDivision(changingMesh[i])  # Dividing by W to get to normalised device coordinates
             changingMesh[i] = viewportTransformation(changingMesh[i])  # Changing the normalised device coordinates to pixels on the screen
             changingMesh[i] = roundPixel(changingMesh[i])  # Rounding the resulting values to nearest pixel
@@ -280,12 +283,18 @@ def update():
             Triangle[i%3][2] = int(changingMesh[i][2])
             if i%3==2:
                 counter+=1
-                drawTriangle(Triangle,'black',1)
+                if outPoints==0:
+                    drawTriangle(Triangle,'black',1)
+                outPoints=0
 
+
+        outPoints = 0
         for i in range(len(axes)):
             changingAxes[i]=modelToWorld(axes[i],0,0,0)              #Moving our model to its place on world coordinates
             changingAxes[i]=worldToView(changingAxes[i])               #Moving the world relative to our camera ("moving" the camera)
             changingAxes[i]=viewToClip(changingAxes[i])                #Applying projection
+            if -changingAxes[i][3]>changingAxes[i][2]:
+                outPoints+=1
             changingAxes[i] = perspectiveDivision(changingAxes[i])  # Dividing by W to get to normalised device coordinates
             changingAxes[i] = viewportTransformation(changingAxes[i])  # Changing the normalised device coordinates to pixels on the screen
             changingMesh[i] = roundPixel(changingAxes[i])  # Rounding the resulting values to nearest pixel
@@ -293,12 +302,14 @@ def update():
             Triangle[i%3][1] = int(changingAxes[i][1])
             Triangle[i%3][2] = int(changingAxes[i][2])
             if i%3==2:
-                if i == 2:
-                    drawTriangle(Triangle,'red',3)
-                if i == 5 :
-                    drawTriangle(Triangle, 'green',3)
-                if i == 8 :
-                    drawTriangle(Triangle, 'blue',3)
+                if outPoints == 0:
+                    if i == 2:
+                        drawTriangle(Triangle,'red',3)
+                    if i == 5 :
+                        drawTriangle(Triangle, 'green',3)
+                    if i == 8 :
+                        drawTriangle(Triangle, 'blue',3)
+                outPoints=0
 
 
 
@@ -341,6 +352,8 @@ def move(event):
         camZangle -= 4
     if event.char == 'o':
         camZangle +=4
+    if event.char == 'r':
+        print(ViewMatrix)
 
 
 cnv.bind_all('<Key>', move)
