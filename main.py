@@ -197,10 +197,7 @@ def modelToWorld(vertex,x,y,z):
 #Applying the transformation to all of our vertexes
 xcam, ycam, zcam = 0, 0, 0
 camXangle, camYangle, camZangle = 0, 0, 0
-ViewMatrix = numpy.array([[ 0.76131811 , 0.03080975 ,-0.64764611 ,-0.34188472],
- [-0.10998158 , 0.99053177, -0.08216359 ,-0.2504455 ],
- [ 0.63898262 , 0.13378177 , 0.75749829 ,-3.40976889],
- [ 0.    ,      0.      ,    0.     ,     1.        ]])
+ViewMatrix = numpy.array([[1, 0, 0, 0], [0, 1, 0, -1], [0, 0, 1, -2], [0, 0, 0, 1]])
 
 def updateView():
     global ViewMatrix, xcam, ycam, zcam, camXangle, camYangle, camZangle
@@ -220,14 +217,22 @@ def updateView():
     xcam, ycam, zcam = 0, 0, 0
     camXangle, camYangle, camZangle = 0, 0, 0
 
+index = 0
+def updatePespective():
+    global ProjectionMatrix,index
+    if index==0:
+        ProjectionMatrix = numpy.array([[1.2,0,0,0], [0,1.2,0,0],[0,0,-1.04,-0.41],[0,0,-1,0]])
+    if index==1:
+        ProjectionMatrix = numpy.array([[0.33,0,0,0], [0,0.33,0,0],[0,0,-1.00,-0.20],[0,0,-1,0]])
+    if index==2:
+        ProjectionMatrix = numpy.array([[0.25,0,0,0], [0,0.25,0,0],[0,0,-0.22,-1.22],[0,0,0,1]])
 def worldToView(vertex):
     return numpy.dot(ViewMatrix,vertex)
 #Now we need to apply the projection matrix to create perspective.
 #view space->clip space
 
 #Projection matrix
-ProjectionMatrix = numpy.array([[1.2,0,0,0], [0,1.2,0,0],[0,0,-1.04,-0.41],[0,0,-1,0]])
-#ProjectionMatrix = numpy.array([[0.25,0,0,0], [0,0.25,0,0],[0,0,-0.22,-1.22],[0,0,0,1]])
+
 def viewToClip(vertex):
     return numpy.dot(ProjectionMatrix,vertex)
 
@@ -370,7 +375,7 @@ def workTriangle(Triangle,j,color,width,axis):
             Triangle[i] = perspectiveDivision(Triangle[i])  # Dividing by W to get to normalised device coordinates
             Triangle[i] = viewportTransformation(Triangle[i])  # Changing the normalised device coordinates to pixels on the screen
             Triangle[i] = roundPixel(Triangle[i])  # Rounding the resulting values to nearest pixel
-        drawTriangle(Triangle, color, width,place)
+        drawTriangle(Triangle, color, width,4)
 
     if out==3:
         pass
@@ -383,6 +388,7 @@ j=0
 def update():
         cnv.delete("all")
         updateView()
+        updatePespective()
         global j
 
         for i in range(len(cubeMesh)):
@@ -420,6 +426,7 @@ def move(event):
     global camXangle
     global camYangle
     global camZangle
+    global index
 
     if event.char=='w':
         zcam+=0.2
@@ -446,8 +453,8 @@ def move(event):
         camZangle -= 4
     if event.char == 'o':
         camZangle +=4
-    if event.char == 'r':
-        print(ViewMatrix)
+    if event.char == 'p':
+        index=(index+1)%3
 
 
 cnv.bind_all('<Key>', move)
