@@ -166,13 +166,15 @@ def roundPixel(vertex):
 
 NewTriangle1=[[0,0,0,0],[0,0,0,0],[0,0,0,0]]
 NewTriangle2=[[0,0,0,0],[0,0,0,0],[0,0,0,0]]
-def workTriangle(Triangle,j,color,width):
+def workTriangle(Triangle,j,color,width,axis):
     outPoints=[0,0,0]
     out = 0
     place = 3
     inside = 0
+    if axis:
+        j=0
     for i in range(3):
-        Triangle[i] = modelToWorld(Triangle[i], 0, 0, 0)  # Moving our model to its place on world coordinates
+        Triangle[i] = modelToWorld(Triangle[i], 0, j, 0)  # Moving our model to its place on world coordinates
         Triangle[i] = worldToView(Triangle[i])  # Moving the world relative to our camera ("moving" the camera)
         Triangle[i] = viewToClip(Triangle[i])  # Applying projection
     if -Triangle[0][3] > Triangle[0][2]:
@@ -230,7 +232,7 @@ def workTriangle(Triangle,j,color,width):
             Triangle[i] = viewportTransformation(Triangle[i])  # Changing the normalised device coordinates to pixels on the screen
             Triangle[i] = roundPixel(Triangle[i])  # Rounding the resulting values to nearest pixel
 
-        drawTriangle(Triangle, "black",1,1)
+        drawTriangle(Triangle, color,width,1)
 
         Triangle[0] = Swap3
         Triangle[1] = Swap2
@@ -239,7 +241,7 @@ def workTriangle(Triangle,j,color,width):
             Triangle[i] = perspectiveDivision(Triangle[i])  # Dividing by W to get to normalised device coordinates
             Triangle[i] = viewportTransformation(Triangle[i])  # Changing the normalised device coordinates to pixels on the screen
             Triangle[i] = roundPixel(Triangle[i])  # Rounding the resulting values to nearest pixel
-        drawTriangle(Triangle, "black",1,1)
+        drawTriangle(Triangle, color,width,1)
 
 
     if out==2:
@@ -260,7 +262,7 @@ def workTriangle(Triangle,j,color,width):
             Triangle[i] = perspectiveDivision(Triangle[i])  # Dividing by W to get to normalised device coordinates
             Triangle[i] = viewportTransformation(Triangle[i])  # Changing the normalised device coordinates to pixels on the screen
             Triangle[i] = roundPixel(Triangle[i])  # Rounding the resulting values to nearest pixel
-        drawTriangle(Triangle, "black", 1,place)
+        drawTriangle(Triangle, color, width,place)
 
     if out==3:
         pass
@@ -380,7 +382,7 @@ def update():
             Triangle[i % 3][2] = (cubeMesh[i][2])
             Triangle[i % 3][3] = (cubeMesh[i][3])
             if i % 3 == 2:
-                workTriangle(Triangle,j,'black',1)
+                workTriangle(Triangle,j,'black',1,0)
 
         for i in range(len(axes)):
             Triangle[i % 3][0] = (axes[i][0])
@@ -389,11 +391,11 @@ def update():
             Triangle[i % 3][3] = (axes[i][3])
             if i%3==2:
                     if i == 2:
-                        workTriangle(Triangle,j,'red',3)
+                        workTriangle(Triangle,j,'red',3,1)
                     if i == 5 :
-                        workTriangle(Triangle,j, 'green',3)
+                        workTriangle(Triangle,j, 'green',3,1)
                     if i == 8 :
-                        workTriangle(Triangle,j, 'blue',3)
+                        workTriangle(Triangle,j, 'blue',3,1)
 
 
         j+=1
