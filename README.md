@@ -11,6 +11,8 @@ Use IK keys to control the pitch.
 
 Use JL keys to controll the yaw.
 
-Use UO keys to control the roll.
+Use UO keys to control the roll
+
+Use P key to switch between the projection matrices (small angle, wide angle, ortographic)
 # Dependencies
 Uses tkinter, math, and numpy packages.
