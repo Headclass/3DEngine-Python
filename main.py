@@ -3,8 +3,8 @@ import math
 import tkinter
 
 #Window dimensions
-width = 1000
-height = 1000
+width = 800
+height = 800
 
 #An empty canvas
 cnv = tkinter.Canvas(bg='white', width=width, height=height)
@@ -60,10 +60,13 @@ def drawLine(x1, y1, x2, y2, color):
                 cnv.create_line(x1, y, x1+1, y, fill=color)
 
 #Triangle rasterization
-def drawTriangle(triangle,color,width):
-    cnv.create_line(triangle[0][0][0],height-triangle[0][1][0],triangle[1][0][0],height-triangle[1][1][0],fill=color,width=width)
-    cnv.create_line(triangle[1][0][0],height-triangle[1][1][0],triangle[2][0][0],height-triangle[2][1][0],fill=color,width=width)
-    cnv.create_line(triangle[2][0][0],height-triangle[2][1][0],triangle[0][0][0],height-triangle[0][1][0],fill=color,width=width)
+def drawTriangle(triangle,color,width,use):
+    if use!=2:
+        cnv.create_line(triangle[0][0][0],height-triangle[0][1][0],triangle[1][0][0],height-triangle[1][1][0],fill=color,width=width)
+    if use!=0:
+        cnv.create_line(triangle[1][0][0],height-triangle[1][1][0],triangle[2][0][0],height-triangle[2][1][0],fill=color,width=width)
+    if use!=1:
+        cnv.create_line(triangle[2][0][0],height-triangle[2][1][0],triangle[0][0][0],height-triangle[0][1][0],fill=color,width=width)
     #drawLine(triangle[0][0],height-triangle[0][1],triangle[1][0],height-triangle[1][1],color)
     #drawLine(triangle[1][0],height-triangle[1][1],triangle[2][0],height-triangle[2][1],color)
     #drawLine(triangle[2][0],height-triangle[2][1],triangle[0][0],height-triangle[0][1],color)
@@ -109,8 +112,10 @@ def modelToWorld(vertex,x,y,z):
 #Applying the transformation to all of our vertexes
 xcam, ycam, zcam = 0, 0, 0
 camXangle, camYangle, camZangle = 0, 0, 0
-ViewMatrix = numpy.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, -6], [0, 0, 0, 1]])
-
+ViewMatrix = numpy.array([[ 0.76131811 , 0.03080975 ,-0.64764611 ,-0.34188472],
+ [-0.10998158 , 0.99053177, -0.08216359 ,-0.2504455 ],
+ [ 0.63898262 , 0.13378177 , 0.75749829 ,-3.40976889],
+ [ 0.    ,      0.      ,    0.     ,     1.        ]])
 
 def updateView():
     global ViewMatrix, xcam, ycam, zcam, camXangle, camYangle, camZangle
@@ -136,7 +141,7 @@ def worldToView(vertex):
 #view space->clip space
 
 #Projection matrix
-ProjectionMatrix = numpy.array([[0.8,0,0,0], [0,0.8,0,0],[0,0,-1.22,-2.22],[0,0,-1,0]])
+ProjectionMatrix = numpy.array([[1.2,0,0,0], [0,1.2,0,0],[0,0,-1.04,-0.41],[0,0,-1,0]])
 #ProjectionMatrix = numpy.array([[0.25,0,0,0], [0,0.25,0,0],[0,0,-0.22,-1.22],[0,0,0,1]])
 def viewToClip(vertex):
     return numpy.dot(ProjectionMatrix,vertex)
@@ -162,19 +167,103 @@ def roundPixel(vertex):
 NewTriangle1=[[0,0,0,0],[0,0,0,0],[0,0,0,0]]
 NewTriangle2=[[0,0,0,0],[0,0,0,0],[0,0,0,0]]
 def workTriangle(Triangle,j,color,width):
-    outPoints = 0
+    outPoints=[0,0,0]
+    out = 0
+    place = 3
+    inside = 0
     for i in range(3):
         Triangle[i] = modelToWorld(Triangle[i], 0, 0, 0)  # Moving our model to its place on world coordinates
         Triangle[i] = worldToView(Triangle[i])  # Moving the world relative to our camera ("moving" the camera)
         Triangle[i] = viewToClip(Triangle[i])  # Applying projection
-        if -Triangle[i][3] > Triangle[i][2]:
-            outPoints += 1
-        Triangle[i] = perspectiveDivision(Triangle[i])  # Dividing by W to get to normalised device coordinates
-        Triangle[i] = viewportTransformation(Triangle[i])  # Changing the normalised device coordinates to pixels on the screen
-        Triangle[i] = roundPixel(Triangle[i])  # Rounding the resulting values to nearest pixel
+    if -Triangle[0][3] > Triangle[0][2]:
+        out+=1
+        inside=0
+    else:
+        place = 0
 
-    if outPoints==0:
-        drawTriangle(Triangle,color,width)
+    if -Triangle[1][3] > Triangle[1][2]:
+        out += 1
+        inside = 1
+    else:
+        place = 1
+
+    if -Triangle[2][3] > Triangle[2][2]:
+        out += 1
+        inside = 2
+    else:
+        place = 2
+
+    if out==0:
+
+        for i in range(3):
+            Triangle[i] = perspectiveDivision(Triangle[i])  # Dividing by W to get to normalised device coordinates
+            Triangle[i] = viewportTransformation(Triangle[i])  # Changing the normalised device coordinates to pixels on the screen
+            Triangle[i] = roundPixel(Triangle[i])  # Rounding the resulting values to nearest pixel
+
+        drawTriangle(Triangle,color,width,3)
+    if out==1:
+        place = inside
+        Swap1=Triangle[(place+1)%3]
+        Swap2 = Triangle[(place + 2) % 3]
+        one=[0,0,0,0]
+        two=[0,0,0,0]
+
+        t01=(  -Triangle[(place+1)%3][3]-Triangle[(place+1)%3][2] ) / ( Triangle[place][3] - Triangle[(place+1)%3][3] + Triangle[(place)][2] - Triangle[(place+1)%3][2]  )
+        t02=(  -Triangle[(place+2)%3][3]-Triangle[(place+2)%3][2] ) / ( Triangle[place][3] - Triangle[(place+2)%3][3] + Triangle[(place)][2] - Triangle[(place+2)%3][2]  )
+
+        one[0] = Triangle[(place + 1) % 3][0] + t01*(Triangle[place][0] - Triangle[(place+1)%3][0])
+        one[1] = Triangle[(place + 1) % 3][1] + t01*(Triangle[place][1] - Triangle[(place+1)%3][1])
+        one[2] = Triangle[(place + 1) % 3][2] + t01*(Triangle[place][2] - Triangle[(place+1)%3][2])
+        one[3] = Triangle[(place + 1) % 3][3] + t01*(Triangle[place][3] - Triangle[(place+1)%3][3])
+
+        two[0] = Triangle[(place + 2) % 3][0] + t02*(Triangle[place][0] - Triangle[(place+2)%3][0])
+        two[1] = Triangle[(place + 2) % 3][1] + t02*(Triangle[place][1] - Triangle[(place+2)%3][1])
+        two[2] = Triangle[(place + 2) % 3][2] + t02*(Triangle[place][2] - Triangle[(place+2)%3][2])
+        two[3] = Triangle[(place + 2) % 3][3] + t02*(Triangle[place][3] - Triangle[(place+2)%3][3])
+
+        Triangle[0] = numpy.array(two)
+        Triangle[1] = numpy.array(one)
+        Triangle[2] = Swap1
+        Swap3=Swap1.copy()
+        for i in range(3):
+            Triangle[i] = perspectiveDivision(Triangle[i])  # Dividing by W to get to normalised device coordinates
+            Triangle[i] = viewportTransformation(Triangle[i])  # Changing the normalised device coordinates to pixels on the screen
+            Triangle[i] = roundPixel(Triangle[i])  # Rounding the resulting values to nearest pixel
+
+        drawTriangle(Triangle, "black",1,1)
+
+        Triangle[0] = Swap3
+        Triangle[1] = Swap2
+        Triangle[2] = numpy.array(two)
+        for i in range(3):
+            Triangle[i] = perspectiveDivision(Triangle[i])  # Dividing by W to get to normalised device coordinates
+            Triangle[i] = viewportTransformation(Triangle[i])  # Changing the normalised device coordinates to pixels on the screen
+            Triangle[i] = roundPixel(Triangle[i])  # Rounding the resulting values to nearest pixel
+        drawTriangle(Triangle, "black",1,1)
+
+
+    if out==2:
+        t01=(  -Triangle[(place+1)%3][3]-Triangle[(place+1)%3][2] ) / ( Triangle[place][3] - Triangle[(place+1)%3][3] + Triangle[(place)][2] - Triangle[(place+1)%3][2]  )
+        t02=(  -Triangle[(place+2)%3][3]-Triangle[(place+2)%3][2] ) / ( Triangle[place][3] - Triangle[(place+2)%3][3] + Triangle[(place)][2] - Triangle[(place+2)%3][2]  )
+
+        Triangle[(place + 1) % 3][0] = Triangle[(place + 1) % 3][0] + t01*(Triangle[place][0] - Triangle[(place+1)%3][0])
+        Triangle[(place + 1) % 3][1] = Triangle[(place + 1) % 3][1] + t01*(Triangle[place][1] - Triangle[(place+1)%3][1])
+        Triangle[(place + 1) % 3][2] = Triangle[(place + 1) % 3][2] + t01*(Triangle[place][2] - Triangle[(place+1)%3][2])
+        Triangle[(place + 1) % 3][3] = Triangle[(place + 1) % 3][3] + t01*(Triangle[place][3] - Triangle[(place+1)%3][3])
+
+        Triangle[(place + 2) % 3][0] = Triangle[(place + 2) % 3][0] + t02*(Triangle[place][0] - Triangle[(place+2)%3][0])
+        Triangle[(place + 2) % 3][1] = Triangle[(place + 2) % 3][1] + t02*(Triangle[place][1] - Triangle[(place+2)%3][1])
+        Triangle[(place + 2) % 3][2] = Triangle[(place + 2) % 3][2] + t02*(Triangle[place][2] - Triangle[(place+2)%3][2])
+        Triangle[(place + 2) % 3][3] = Triangle[(place + 2) % 3][3] + t02*(Triangle[place][3] - Triangle[(place+2)%3][3])
+
+        for i in range(3):
+            Triangle[i] = perspectiveDivision(Triangle[i])  # Dividing by W to get to normalised device coordinates
+            Triangle[i] = viewportTransformation(Triangle[i])  # Changing the normalised device coordinates to pixels on the screen
+            Triangle[i] = roundPixel(Triangle[i])  # Rounding the resulting values to nearest pixel
+        drawTriangle(Triangle, "black", 1,place)
+
+    if out==3:
+        pass
 
 #Vertexes of the object
 cubeMesh=[
@@ -346,6 +435,8 @@ def move(event):
         camZangle -= 4
     if event.char == 'o':
         camZangle +=4
+    if event.char == 'r':
+        print(ViewMatrix)
 
 
 cnv.bind_all('<Key>', move)
