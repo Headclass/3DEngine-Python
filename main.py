@@ -9,6 +9,96 @@ height = 800
 #An empty canvas
 cnv = tkinter.Canvas(bg='white', width=width, height=height)
 
+
+#Vertexes of the object
+cubeMesh=[
+#Ground
+[-2, 0, -2],[2, 0, -2],[-2, 0, 2],
+[-2, 0, 2],[2, 0, -2],[2, 0, 2],
+
+#House
+[-0.5, 0., -0.5 ],
+[-0.5, 1., -0.5 ],
+[-0.5, 0, 0.5],
+
+[-0.5, 1, -0.5],
+[-0.5, 0., 0.5],
+[-0.5, 1., 0.5],
+
+[-0.5, 0., -0.5],
+[-0.5, 1., -0.5],
+[0.5, 0., -0.5],
+
+[-0.5, 1., -0.5],
+[0.5, 0., -0.5],
+[0.5, 1., -0.5],
+
+[0.5, 0., -0.5],
+[0.5, 1., -0.5],
+[0.5, 0., 0.5],
+
+#Roof
+[0.5, 1., -0.5],
+[0.5, 0., 0.5],
+[0.5, 1, 0.5],
+
+[-0.5, 0., 0.5],
+[-0.5, 1., 0.5],
+[0.5, 0., 0.5],
+
+[-0.5, 1., 0.5],
+[0.5, 0., 0.5],
+[0.5, 1., 0.5],
+
+[-0.25, 0.0, 0.5],
+[0.25, 0., 0.5],
+[0.25, 0.5, 0.5],
+
+[-0.25, 0., 0.5],
+[0.25, 0.5, 0.5],
+[-0.25, 0.5, 0.5],
+
+
+#Door
+[-0.5, 1., -0.5],
+[-0.5, 1., 0.5],
+[0., 2., 0.0],
+
+[0.5, 1., -0.5],
+[0.5, 1., 0.5],
+[0., 2., 0.0],
+
+[-0.5, 1., -0.5],
+[0.5, 1., -0.5],
+[0., 2., 0.0],
+
+[-0.5, 1, 0.5],
+[0.5, 1, 0.5],
+[0., 2., 0.0],
+
+]
+
+#Axes
+axes = [
+    #x
+[0, 0, 0],
+[0.7, 0, 0],
+[0, 0, 0],
+    #y
+[0, 0, 0],
+[0, 0.7, 0],
+[0, 0, 0],
+    #z
+[0, 0, 0],
+[0, 0, 0.7],
+[0, 0, 0]
+]
+
+#An empty triangle
+Triangle=[[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+
+
+#Line drawing algorithm - currently not in use
 def drawLine(x1, y1, x2, y2, color):
     chan = 0
     dx = x2 - x1
@@ -59,17 +149,7 @@ def drawLine(x1, y1, x2, y2, color):
                     return
                 cnv.create_line(x1, y, x1+1, y, fill=color)
 
-#Triangle rasterization
-def drawTriangle(triangle,color,width,use):
-    if use!=2:
-        cnv.create_line(triangle[0][0][0],height-triangle[0][1][0],triangle[1][0][0],height-triangle[1][1][0],fill=color,width=width)
-    if use!=0:
-        cnv.create_line(triangle[1][0][0],height-triangle[1][1][0],triangle[2][0][0],height-triangle[2][1][0],fill=color,width=width)
-    if use!=1:
-        cnv.create_line(triangle[2][0][0],height-triangle[2][1][0],triangle[0][0][0],height-triangle[0][1][0],fill=color,width=width)
-    #drawLine(triangle[0][0],height-triangle[0][1],triangle[1][0],height-triangle[1][1],color)
-    #drawLine(triangle[1][0],height-triangle[1][1],triangle[2][0],height-triangle[2][1],color)
-    #drawLine(triangle[2][0],height-triangle[2][1],triangle[0][0],height-triangle[0][1],color)
+
 
 #Adding a homogenous coordinate (w)
 def homogenous(vertex):
@@ -78,6 +158,11 @@ def homogenous(vertex):
 #Transforming row major vertexes to column major vertexes
 def transpose(vertex):
     return numpy.array([vertex]).T
+
+
+
+
+
 
 
 #SPACE CONVERSION
@@ -164,8 +249,31 @@ def roundPixel(vertex):
     vertex[1] = round(float(vertex[1][0]))
     return vertex
 
-NewTriangle1=[[0,0,0,0],[0,0,0,0],[0,0,0,0]]
-NewTriangle2=[[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+
+for i in range(len(cubeMesh)):
+    homogenous(cubeMesh[i])               # Adding a homogenous coordinate
+    cubeMesh[i] = transpose(cubeMesh[i])  # Changing a row vector to a column vector
+
+for i in range(len(axes)):
+    homogenous(axes[i])               # Adding a homogenous coordinate
+    axes[i] = transpose(axes[i])  # Changing a row vector to a column vector
+
+
+
+
+
+#Triangle rasterization
+def drawTriangle(triangle,color,width,use):
+    if use!=2:
+        cnv.create_line(triangle[0][0][0],height-triangle[0][1][0],triangle[1][0][0],height-triangle[1][1][0],fill=color,width=width)
+    if use!=0:
+        cnv.create_line(triangle[1][0][0],height-triangle[1][1][0],triangle[2][0][0],height-triangle[2][1][0],fill=color,width=width)
+    if use!=1:
+        cnv.create_line(triangle[2][0][0],height-triangle[2][1][0],triangle[0][0][0],height-triangle[0][1][0],fill=color,width=width)
+    #drawLine(triangle[0][0],height-triangle[0][1],triangle[1][0],height-triangle[1][1],color)
+    #drawLine(triangle[1][0],height-triangle[1][1],triangle[2][0],height-triangle[2][1],color)
+    #drawLine(triangle[2][0],height-triangle[2][1],triangle[0][0],height-triangle[0][1],color)
+
 def workTriangle(Triangle,j,color,width,axis):
     outPoints=[0,0,0]
     out = 0
@@ -267,109 +375,10 @@ def workTriangle(Triangle,j,color,width,axis):
     if out==3:
         pass
 
-#Vertexes of the object
-cubeMesh=[
-#Ground
-[-2, 0, -2],[2, 0, -2],[-2, 0, 2],
-[-2, 0, 2],[2, 0, -2],[2, 0, 2],
-
-#House
-[-0.5, 0., -0.5 ],
-[-0.5, 1., -0.5 ],
-[-0.5, 0, 0.5],
-
-[-0.5, 1, -0.5],
-[-0.5, 0., 0.5],
-[-0.5, 1., 0.5],
-
-[-0.5, 0., -0.5],
-[-0.5, 1., -0.5],
-[0.5, 0., -0.5],
-
-[-0.5, 1., -0.5],
-[0.5, 0., -0.5],
-[0.5, 1., -0.5],
-
-[0.5, 0., -0.5],
-[0.5, 1., -0.5],
-[0.5, 0., 0.5],
-
-#Roof
-[0.5, 1., -0.5],
-[0.5, 0., 0.5],
-[0.5, 1, 0.5],
-
-[-0.5, 0., 0.5],
-[-0.5, 1., 0.5],
-[0.5, 0., 0.5],
-
-[-0.5, 1., 0.5],
-[0.5, 0., 0.5],
-[0.5, 1., 0.5],
-
-[-0.25, 0.0, 0.5],
-[0.25, 0., 0.5],
-[0.25, 0.5, 0.5],
-
-[-0.25, 0., 0.5],
-[0.25, 0.5, 0.5],
-[-0.25, 0.5, 0.5],
 
 
-#Door
-[-0.5, 1., -0.5],
-[-0.5, 1., 0.5],
-[0., 2., 0.0],
 
-[0.5, 1., -0.5],
-[0.5, 1., 0.5],
-[0., 2., 0.0],
-
-[-0.5, 1., -0.5],
-[0.5, 1., -0.5],
-[0., 2., 0.0],
-
-[-0.5, 1, 0.5],
-[0.5, 1, 0.5],
-[0., 2., 0.0],
-
-]
-
-#Axes
-axes = [
-    #x
-[0, 0, 0],
-[0.7, 0, 0],
-[0, 0, 0],
-    #y
-[0, 0, 0],
-[0, 0.7, 0],
-[0, 0, 0],
-    #z
-[0, 0, 0],
-[0, 0, 0.7],
-[0, 0, 0]
-]
-
-#An empty triangle
-Triangle=[[0,0,0,0],[0,0,0,0],[0,0,0,0]]
-
-#Colors
-
-#Triangle counter
 cnv.pack()
-
-
-for i in range(len(cubeMesh)):
-    homogenous(cubeMesh[i])               # Adding a homogenous coordinate
-    cubeMesh[i] = transpose(cubeMesh[i])  # Changing a row vector to a column vector
-
-for i in range(len(axes)):
-    homogenous(axes[i])               # Adding a homogenous coordinate
-    axes[i] = transpose(axes[i])  # Changing a row vector to a column vector
-
-changingMesh = cubeMesh.copy()
-changingAxes = axes.copy()
 j=0
 def update():
         cnv.delete("all")
