@@ -3,7 +3,7 @@ A simple 3D engine which renders vertices in real time using a movable camera. U
 
 The goal was to minimize the use of external libraries and blackbox frameworks and to showcase exactly what happens when a vertex is projected onto the screen. 
 # Moving the camera
-Use WASD keys to move the camera forwards, backwards, as if it was a plane (going forwards means that the plane will go where it's nose is pointed)
+Use WASD keys to move the camera forwards, backwards, as if it was a plane (going forwards means that the plane will go where it's nose is pointed) in contrast with an FPS game, where, even if pointing the gun at your feet, your character will walk forwards after pressing W.
 
 Use EQ to elevate or lower the camera.
 # Rotating the camera
