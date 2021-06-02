@@ -61,9 +61,9 @@ def drawLine(x1, y1, x2, y2, color):
 
 #Triangle rasterization
 def drawTriangle(triangle,color,width):
-    cnv.create_line(triangle[0][0],height-triangle[0][1],triangle[1][0],height-triangle[1][1],fill=color,width=width)
-    cnv.create_line(triangle[1][0],height-triangle[1][1],triangle[2][0],height-triangle[2][1],fill=color,width=width)
-    cnv.create_line(triangle[2][0],height-triangle[2][1],triangle[0][0],height-triangle[0][1],fill=color,width=width)
+    cnv.create_line(triangle[0][0][0],height-triangle[0][1][0],triangle[1][0][0],height-triangle[1][1][0],fill=color,width=width)
+    cnv.create_line(triangle[1][0][0],height-triangle[1][1][0],triangle[2][0][0],height-triangle[2][1][0],fill=color,width=width)
+    cnv.create_line(triangle[2][0][0],height-triangle[2][1][0],triangle[0][0][0],height-triangle[0][1][0],fill=color,width=width)
     #drawLine(triangle[0][0],height-triangle[0][1],triangle[1][0],height-triangle[1][1],color)
     #drawLine(triangle[1][0],height-triangle[1][1],triangle[2][0],height-triangle[2][1],color)
     #drawLine(triangle[2][0],height-triangle[2][1],triangle[0][0],height-triangle[0][1],color)
@@ -155,9 +155,26 @@ def viewportTransformation(vertex):
 
 #Rounding the resulting values
 def roundPixel(vertex):
-    vertex[0]=  int(round(vertex[0][0]))
-    vertex[1] = int(round(vertex[1][0]))
+    vertex[0]=  round(float(vertex[0][0]))
+    vertex[1] = round(float(vertex[1][0]))
     return vertex
+
+NewTriangle1=[[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+NewTriangle2=[[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+def workTriangle(Triangle,j,color,width):
+    outPoints = 0
+    for i in range(3):
+        Triangle[i] = modelToWorld(Triangle[i], 0, 0, 0)  # Moving our model to its place on world coordinates
+        Triangle[i] = worldToView(Triangle[i])  # Moving the world relative to our camera ("moving" the camera)
+        Triangle[i] = viewToClip(Triangle[i])  # Applying projection
+        if -Triangle[i][3] > Triangle[i][2]:
+            outPoints += 1
+        Triangle[i] = perspectiveDivision(Triangle[i])  # Dividing by W to get to normalised device coordinates
+        Triangle[i] = viewportTransformation(Triangle[i])  # Changing the normalised device coordinates to pixels on the screen
+        Triangle[i] = roundPixel(Triangle[i])  # Rounding the resulting values to nearest pixel
+
+    if outPoints==0:
+        drawTriangle(Triangle,color,width)
 
 #Vertexes of the object
 cubeMesh=[
@@ -244,7 +261,7 @@ axes = [
 ]
 
 #An empty triangle
-Triangle=[[0,0,0],[0,0,0],[0,0,0]]
+Triangle=[[0,0,0,0],[0,0,0,0],[0,0,0,0]]
 
 #Colors
 
@@ -266,51 +283,28 @@ j=0
 def update():
         cnv.delete("all")
         updateView()
-        global j,counter,colors
-        counter=0
-        outPoints=0
+        global j
+
         for i in range(len(cubeMesh)):
-            changingMesh[i]=modelToWorld(cubeMesh[i],0,0,0)              #Moving our model to its place on world coordinates
-            changingMesh[i]=worldToView(changingMesh[i])               #Moving the world relative to our camera ("moving" the camera)
-            changingMesh[i]=viewToClip(changingMesh[i])                #Applying projection
-            if -changingMesh[i][3]>changingMesh[i][2]:
-                outPoints+=1
-            changingMesh[i] = perspectiveDivision(changingMesh[i])  # Dividing by W to get to normalised device coordinates
-            changingMesh[i] = viewportTransformation(changingMesh[i])  # Changing the normalised device coordinates to pixels on the screen
-            changingMesh[i] = roundPixel(changingMesh[i])  # Rounding the resulting values to nearest pixel
-            Triangle[i%3][0] = int(changingMesh[i][0])
-            Triangle[i%3][1] = int(changingMesh[i][1])
-            Triangle[i%3][2] = int(changingMesh[i][2])
-            if i%3==2:
-                counter+=1
-                if outPoints==0:
-                    drawTriangle(Triangle,'black',1)
-                outPoints=0
+            Triangle[i % 3][0] = (cubeMesh[i][0])
+            Triangle[i % 3][1] = (cubeMesh[i][1])
+            Triangle[i % 3][2] = (cubeMesh[i][2])
+            Triangle[i % 3][3] = (cubeMesh[i][3])
+            if i % 3 == 2:
+                workTriangle(Triangle,j,'black',1)
 
-
-        outPoints = 0
         for i in range(len(axes)):
-            changingAxes[i]=modelToWorld(axes[i],0,0,0)              #Moving our model to its place on world coordinates
-            changingAxes[i]=worldToView(changingAxes[i])               #Moving the world relative to our camera ("moving" the camera)
-            changingAxes[i]=viewToClip(changingAxes[i])                #Applying projection
-            if -changingAxes[i][3]>changingAxes[i][2]:
-                outPoints+=1
-            changingAxes[i] = perspectiveDivision(changingAxes[i])  # Dividing by W to get to normalised device coordinates
-            changingAxes[i] = viewportTransformation(changingAxes[i])  # Changing the normalised device coordinates to pixels on the screen
-            changingMesh[i] = roundPixel(changingAxes[i])  # Rounding the resulting values to nearest pixel
-            Triangle[i%3][0] = int(changingAxes[i][0])
-            Triangle[i%3][1] = int(changingAxes[i][1])
-            Triangle[i%3][2] = int(changingAxes[i][2])
+            Triangle[i % 3][0] = (axes[i][0])
+            Triangle[i % 3][1] = (axes[i][1])
+            Triangle[i % 3][2] = (axes[i][2])
+            Triangle[i % 3][3] = (axes[i][3])
             if i%3==2:
-                if outPoints == 0:
                     if i == 2:
-                        drawTriangle(Triangle,'red',3)
+                        workTriangle(Triangle,j,'red',3)
                     if i == 5 :
-                        drawTriangle(Triangle, 'green',3)
+                        workTriangle(Triangle,j, 'green',3)
                     if i == 8 :
-                        drawTriangle(Triangle, 'blue',3)
-                outPoints=0
-
+                        workTriangle(Triangle,j, 'blue',3)
 
 
         j+=1
