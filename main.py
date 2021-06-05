@@ -10,7 +10,7 @@ import cProfile
 width = 255
 height = 255
 
-pyxel.init(width, height,fps=20)
+pyxel.init(width, height,fps=25)
 
 #An empty canvas
 
@@ -102,7 +102,7 @@ axes = [
 Triangle=[[0,0,0,0],[0,0,0,0],[0,0,0,0]]
 
 
-#Line drawing algorithm - currently not in use
+#Line drawing algorithm
 def drawLine(x1, y1, x2, y2, color):
     chan = 0
     dx = x2 - x1
@@ -152,8 +152,6 @@ def drawLine(x1, y1, x2, y2, color):
                 if x1 < 0 or x1 > height-1 or y < 0 or y > width-1:
                     return
                 pyxel.pset(x1, y, color)
-
-
 
 #Adding a homogenous coordinate (w)
 def homogenous(vertex):
@@ -273,17 +271,16 @@ for i in range(len(axes)):
 
 #Triangle rasterization
 def drawTriangle(triangle,color,use):
+
     if use!=2:
         drawLine(int(triangle[0][0][0]), int(height - triangle[0][1][0]), int(triangle[1][0][0]), int(height - triangle[1][1][0]), color)
         #pyxel.line(triangle[0][0][0],height-triangle[0][1][0],triangle[1][0][0],height-triangle[1][1][0],5)
-
     if use!=0:
         drawLine(int(triangle[1][0][0]),int(height-triangle[1][1][0]),int(triangle[2][0][0]),int(height-triangle[2][1][0]),color)
         #pyxel.line(triangle[1][0][0],height-triangle[1][1][0],triangle[2][0][0],height-triangle[2][1][0],5)
     if use!=1:
         drawLine(int(triangle[2][0][0]),int(height-triangle[2][1][0]),int(triangle[0][0][0]),int(height-triangle[0][1][0]),color)
         #pyxel.line(triangle[2][0][0],height-triangle[2][1][0],triangle[0][0][0],height-triangle[0][1][0],5)
-
 
 
 def workTriangle(Triangle,j,color,axis):
@@ -294,7 +291,7 @@ def workTriangle(Triangle,j,color,axis):
     if axis:
         j=0
     for i in range(3):
-        Triangle[i] = modelToWorld(Triangle[i], 0, j, 0)  # Moving our model to its place on world coordinates
+        Triangle[i] = modelToWorld(Triangle[i], 0, 0, 0)  # Moving our model to its place on world coordinates
         Triangle[i] = worldToView(Triangle[i])  # Moving the world relative to our camera ("moving" the camera)
         Triangle[i] = viewToClip(Triangle[i])  # Applying projection
     if -Triangle[0][3] > Triangle[0][2]:
@@ -425,7 +422,7 @@ def update():
 
 def quit():
     if pyxel.btnp(pyxel.KEY_T):
-        print(ViewMatrix)
+        pyxel.quit()
     global xcam
     global ycam
     global zcam
@@ -462,21 +459,5 @@ def quit():
     if pyxel.btnp(pyxel.KEY_P):
         index=(index+1)%3
 
-test=[[0,0,0,0],[0,0,0,0],[0,0,0,0]]
-test[0][0] = (cubeMesh[0][0])
-test[0][1] = (cubeMesh[0][1])
-test[0][2] = (cubeMesh[0][2])
-test[0][3] = (cubeMesh[0][3])
-
-test[1][0] = (cubeMesh[1][0])
-test[1][1] = (cubeMesh[1][1])
-test[1][2] = (cubeMesh[1][2])
-test[1][3] = (cubeMesh[1][3])
-
-test[1][0] = (cubeMesh[2][0])
-test[2][1] = (cubeMesh[2][1])
-test[2][2] = (cubeMesh[2][2])
-test[2][3] = (cubeMesh[2][3])
-#cProfile.run('workTriangle(')
 pyxel.run(update, quit)
 
