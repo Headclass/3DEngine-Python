@@ -270,14 +270,17 @@ for i in range(len(axes)):
 #Triangle rasterization
 def drawTriangle(triangle,color,width,use):
     if use!=2:
+        #drawLine(triangle[0][0], height - triangle[0][1], triangle[1][0], height - triangle[1][1], color)
         cnv.create_line(triangle[0][0][0],height-triangle[0][1][0],triangle[1][0][0],height-triangle[1][1][0],fill=color,width=width)
+
     if use!=0:
+        #drawLine(triangle[1][0],height-triangle[1][1],triangle[2][0],height-triangle[2][1],color)
         cnv.create_line(triangle[1][0][0],height-triangle[1][1][0],triangle[2][0][0],height-triangle[2][1][0],fill=color,width=width)
     if use!=1:
+        #drawLine(triangle[2][0],height-triangle[2][1],triangle[0][0],height-triangle[0][1],color)
         cnv.create_line(triangle[2][0][0],height-triangle[2][1][0],triangle[0][0][0],height-triangle[0][1][0],fill=color,width=width)
-    #drawLine(triangle[0][0],height-triangle[0][1],triangle[1][0],height-triangle[1][1],color)
-    #drawLine(triangle[1][0],height-triangle[1][1],triangle[2][0],height-triangle[2][1],color)
-    #drawLine(triangle[2][0],height-triangle[2][1],triangle[0][0],height-triangle[0][1],color)
+
+
 
 def workTriangle(Triangle,j,color,width,axis):
     outPoints=[0,0,0]
