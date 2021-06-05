@@ -1,14 +1,18 @@
 import numpy
 import math
 import tkinter
+import pyxel
+import cProfile
+
+
 
 #Window dimensions
-width = 800
-height = 800
+width = 255
+height = 255
+
+pyxel.init(width, height,fps=20)
 
 #An empty canvas
-cnv = tkinter.Canvas(bg='white', width=width, height=height)
-
 
 #Vertexes of the object
 cubeMesh=[
@@ -121,14 +125,14 @@ def drawLine(x1, y1, x2, y2, color):
         for x in range(x1,x2+1):
             if (chan == 0):
                 try:
-                    cnv.create_line(x, int(y) >> 8,x+1,int(y) >> 8,fill=color)
+                    pyxel.pset(x, int(y) >> 8,color)
                 except:
                     return
                 y += k
 
             else:
                 try:
-                    cnv.create_line(int(y) >> 8,x,(int(y) >> 8)+1,x,fill=color)
+                    pyxel.pset(int(y) >> 8,x,color)
                 except:
                     return
                 y += k
@@ -139,7 +143,7 @@ def drawLine(x1, y1, x2, y2, color):
             for x in range(x1,x2+1):
                 if y1 < 0 or y1 > height-1 or x < 0 or x > width-1:
                     return
-                cnv.create_line(x, y1, x+1, y1, fill=color)
+                pyxel.pset(x, y1,color)
 
         if (dx == 0 and dy != 0):
             if (y2 < y1):
@@ -147,7 +151,7 @@ def drawLine(x1, y1, x2, y2, color):
             for y in range(y1, y2 + 1):
                 if x1 < 0 or x1 > height-1 or y < 0 or y > width-1:
                     return
-                cnv.create_line(x1, y, x1+1, y, fill=color)
+                pyxel.pset(x1, y, color)
 
 
 
@@ -197,7 +201,7 @@ def modelToWorld(vertex,x,y,z):
 #Applying the transformation to all of our vertexes
 xcam, ycam, zcam = 0, 0, 0
 camXangle, camYangle, camZangle = 0, 0, 0
-ViewMatrix = numpy.array([[1, 0, 0, 0], [0, 1, 0, -1], [0, 0, 1, -2], [0, 0, 0, 1]])
+ViewMatrix = numpy.array([[1, 0, 0, 0], [0, 1, 0, -1], [0, 0, 1, -4], [0, 0, 0, 1]])
 
 def updateView():
     global ViewMatrix, xcam, ycam, zcam, camXangle, camYangle, camZangle
@@ -236,7 +240,7 @@ def worldToView(vertex):
 def viewToClip(vertex):
     return numpy.dot(ProjectionMatrix,vertex)
 
-#In order to turn the resulting coordinates into NDC, we need to divide by W.
+#In order to turn the resulting coordinates into NDC, we need to divide by W`.
 def perspectiveDivision(vertex):
     for j in range(4):
         vertex[j]=vertex[j]/vertex[3]
@@ -268,21 +272,21 @@ for i in range(len(axes)):
 
 
 #Triangle rasterization
-def drawTriangle(triangle,color,width,use):
+def drawTriangle(triangle,color,use):
     if use!=2:
-        #drawLine(triangle[0][0], height - triangle[0][1], triangle[1][0], height - triangle[1][1], color)
-        cnv.create_line(triangle[0][0][0],height-triangle[0][1][0],triangle[1][0][0],height-triangle[1][1][0],fill=color,width=width)
+        drawLine(int(triangle[0][0][0]), int(height - triangle[0][1][0]), int(triangle[1][0][0]), int(height - triangle[1][1][0]), color)
+        #pyxel.line(triangle[0][0][0],height-triangle[0][1][0],triangle[1][0][0],height-triangle[1][1][0],5)
 
     if use!=0:
-        #drawLine(triangle[1][0],height-triangle[1][1],triangle[2][0],height-triangle[2][1],color)
-        cnv.create_line(triangle[1][0][0],height-triangle[1][1][0],triangle[2][0][0],height-triangle[2][1][0],fill=color,width=width)
+        drawLine(int(triangle[1][0][0]),int(height-triangle[1][1][0]),int(triangle[2][0][0]),int(height-triangle[2][1][0]),color)
+        #pyxel.line(triangle[1][0][0],height-triangle[1][1][0],triangle[2][0][0],height-triangle[2][1][0],5)
     if use!=1:
-        #drawLine(triangle[2][0],height-triangle[2][1],triangle[0][0],height-triangle[0][1],color)
-        cnv.create_line(triangle[2][0][0],height-triangle[2][1][0],triangle[0][0][0],height-triangle[0][1][0],fill=color,width=width)
+        drawLine(int(triangle[2][0][0]),int(height-triangle[2][1][0]),int(triangle[0][0][0]),int(height-triangle[0][1][0]),color)
+        #pyxel.line(triangle[2][0][0],height-triangle[2][1][0],triangle[0][0][0],height-triangle[0][1][0],5)
 
 
 
-def workTriangle(Triangle,j,color,width,axis):
+def workTriangle(Triangle,j,color,axis):
     outPoints=[0,0,0]
     out = 0
     place = 3
@@ -318,7 +322,7 @@ def workTriangle(Triangle,j,color,width,axis):
             Triangle[i] = viewportTransformation(Triangle[i])  # Changing the normalised device coordinates to pixels on the screen
             Triangle[i] = roundPixel(Triangle[i])  # Rounding the resulting values to nearest pixel
 
-        drawTriangle(Triangle,color,width,3)
+        drawTriangle(Triangle,color,3)
     if out==1:
         place = inside
         Swap1=Triangle[(place+1)%3]
@@ -348,7 +352,7 @@ def workTriangle(Triangle,j,color,width,axis):
             Triangle[i] = viewportTransformation(Triangle[i])  # Changing the normalised device coordinates to pixels on the screen
             Triangle[i] = roundPixel(Triangle[i])  # Rounding the resulting values to nearest pixel
 
-        drawTriangle(Triangle, color,width,1)
+        drawTriangle(Triangle, color,1)
 
         Triangle[0] = Swap3
         Triangle[1] = Swap2
@@ -357,7 +361,7 @@ def workTriangle(Triangle,j,color,width,axis):
             Triangle[i] = perspectiveDivision(Triangle[i])  # Dividing by W to get to normalised device coordinates
             Triangle[i] = viewportTransformation(Triangle[i])  # Changing the normalised device coordinates to pixels on the screen
             Triangle[i] = roundPixel(Triangle[i])  # Rounding the resulting values to nearest pixel
-        drawTriangle(Triangle, color,width,1)
+        drawTriangle(Triangle, color,1)
 
 
     if out==2:
@@ -378,7 +382,7 @@ def workTriangle(Triangle,j,color,width,axis):
             Triangle[i] = perspectiveDivision(Triangle[i])  # Dividing by W to get to normalised device coordinates
             Triangle[i] = viewportTransformation(Triangle[i])  # Changing the normalised device coordinates to pixels on the screen
             Triangle[i] = roundPixel(Triangle[i])  # Rounding the resulting values to nearest pixel
-        drawTriangle(Triangle, color, width,4)
+        drawTriangle(Triangle, color,4)
 
     if out==3:
         pass
@@ -386,10 +390,9 @@ def workTriangle(Triangle,j,color,width,axis):
 
 
 
-cnv.pack()
 j=0
 def update():
-        cnv.delete("all")
+        pyxel.cls(0)
         updateView()
         updatePespective()
         global j
@@ -400,7 +403,7 @@ def update():
             Triangle[i % 3][2] = (cubeMesh[i][2])
             Triangle[i % 3][3] = (cubeMesh[i][3])
             if i % 3 == 2:
-                workTriangle(Triangle,j,'black',1,0)
+                workTriangle(Triangle,j,13,0)
 
         for i in range(len(axes)):
             Triangle[i % 3][0] = (axes[i][0])
@@ -409,20 +412,20 @@ def update():
             Triangle[i % 3][3] = (axes[i][3])
             if i%3==2:
                     if i == 2:
-                        workTriangle(Triangle,j,'red',3,1)
+                        workTriangle(Triangle,j,8,1)
                     if i == 5 :
-                        workTriangle(Triangle,j, 'green',3,1)
+                        workTriangle(Triangle,j, 11,1)
                     if i == 8 :
-                        workTriangle(Triangle,j, 'blue',3,1)
+                        workTriangle(Triangle,j, 5,1)
 
 
         j+=1
         if j == 360:
             j=0
-        cnv.after(10,update)
 
-update()
-def move(event):
+def quit():
+    if pyxel.btnp(pyxel.KEY_T):
+        print(ViewMatrix)
     global xcam
     global ycam
     global zcam
@@ -431,35 +434,49 @@ def move(event):
     global camZangle
     global index
 
-    if event.char=='w':
+    if pyxel.btnp(pyxel.KEY_W):
         zcam+=0.2
-    if event.char == 's':
+    if pyxel.btnp(pyxel.KEY_S):
         zcam-=0.2
-    if event.char=='a':
+    if pyxel.btnp(pyxel.KEY_A):
         xcam+=0.2
-    if event.char == 'd':
+    if pyxel.btnp(pyxel.KEY_D):
         xcam-=0.2
-    if event.char=='q':
+    if pyxel.btnp(pyxel.KEY_Q):
         ycam-=0.2
-    if event.char == 'e':
+    if pyxel.btnp(pyxel.KEY_E):
         ycam+=0.2
 
-    if event.char == 'i':
+    if pyxel.btnp(pyxel.KEY_I):
         camXangle -= 4
-    if event.char == 'k':
+    if pyxel.btnp(pyxel.KEY_K):
         camXangle += 4
-    if event.char == 'j':
+    if pyxel.btnp(pyxel.KEY_J):
         camYangle -= 4
-    if event.char == 'l':
+    if pyxel.btnp(pyxel.KEY_L):
         camYangle += 4
-    if event.char == 'u':
+    if pyxel.btnp(pyxel.KEY_U):
         camZangle -= 4
-    if event.char == 'o':
+    if pyxel.btnp(pyxel.KEY_O):
         camZangle +=4
-    if event.char == 'p':
+    if pyxel.btnp(pyxel.KEY_P):
         index=(index+1)%3
 
+test=[[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+test[0][0] = (cubeMesh[0][0])
+test[0][1] = (cubeMesh[0][1])
+test[0][2] = (cubeMesh[0][2])
+test[0][3] = (cubeMesh[0][3])
 
-cnv.bind_all('<Key>', move)
+test[1][0] = (cubeMesh[1][0])
+test[1][1] = (cubeMesh[1][1])
+test[1][2] = (cubeMesh[1][2])
+test[1][3] = (cubeMesh[1][3])
 
-tkinter.mainloop()
+test[1][0] = (cubeMesh[2][0])
+test[2][1] = (cubeMesh[2][1])
+test[2][2] = (cubeMesh[2][2])
+test[2][3] = (cubeMesh[2][3])
+#cProfile.run('workTriangle(')
+pyxel.run(update, quit)
+
