@@ -1,18 +1,10 @@
 import numpy
 import math
-import tkinter
 import pyxel
-import cProfile
-
-
 
 #Window dimensions
 width = 255
 height = 255
-
-pyxel.init(width, height,fps=25)
-
-#An empty canvas
 
 #Vertexes of the object
 cubeMesh=[
@@ -41,11 +33,11 @@ cubeMesh=[
 [0.5, 1., -0.5],
 [0.5, 0., 0.5],
 
-#Roof
 [0.5, 1., -0.5],
 [0.5, 0., 0.5],
 [0.5, 1, 0.5],
 
+#Roof
 [-0.5, 0., 0.5],
 [-0.5, 1., 0.5],
 [0.5, 0., 0.5],
@@ -61,7 +53,6 @@ cubeMesh=[
 [-0.25, 0., 0.5],
 [0.25, 0.5, 0.5],
 [-0.25, 0.5, 0.5],
-
 
 #Door
 [-0.5, 1., -0.5],
@@ -79,7 +70,6 @@ cubeMesh=[
 [-0.5, 1, 0.5],
 [0.5, 1, 0.5],
 [0., 2., 0.0],
-
 ]
 
 #Axes
@@ -98,9 +88,26 @@ axes = [
 [0, 0, 0]
 ]
 
+
+#Adding a homogenous coordinate to all vertexes (w)
+def homogenous(vertex):
+    vertex.append(1)
+
+#Transforming row major vertexes to column major vertexes
+def transpose(vertex):
+    return numpy.array([vertex]).T
+
+
+for i in range(len(cubeMesh)):
+    homogenous(cubeMesh[i])               # Adding a homogenous coordinate
+    cubeMesh[i] = transpose(cubeMesh[i])  # Changing a row vector to a column vector
+
+for i in range(len(axes)):
+    homogenous(axes[i])                   # Adding a homogenous coordinate
+    axes[i] = transpose(axes[i])          # Changing a row vector to a column vector
+
 #An empty triangle
 Triangle=[[0,0,0,0],[0,0,0,0],[0,0,0,0]]
-
 
 #Line drawing algorithm
 def drawLine(x1, y1, x2, y2, color):
@@ -152,20 +159,6 @@ def drawLine(x1, y1, x2, y2, color):
                 if x1 < 0 or x1 > height-1 or y < 0 or y > width-1:
                     return
                 pyxel.pset(x1, y, color)
-
-#Adding a homogenous coordinate (w)
-def homogenous(vertex):
-    vertex.append(1)
-
-#Transforming row major vertexes to column major vertexes
-def transpose(vertex):
-    return numpy.array([vertex]).T
-
-
-
-
-
-
 
 #SPACE CONVERSION
 
@@ -257,34 +250,23 @@ def roundPixel(vertex):
     return vertex
 
 
-for i in range(len(cubeMesh)):
-    homogenous(cubeMesh[i])               # Adding a homogenous coordinate
-    cubeMesh[i] = transpose(cubeMesh[i])  # Changing a row vector to a column vector
-
-for i in range(len(axes)):
-    homogenous(axes[i])               # Adding a homogenous coordinate
-    axes[i] = transpose(axes[i])  # Changing a row vector to a column vector
-
-
-
-
-
 #Triangle rasterization
 def drawTriangle(triangle,color,use):
+    global triangles
 
     if use!=2:
-        drawLine(int(triangle[0][0][0]), int(height - triangle[0][1][0]), int(triangle[1][0][0]), int(height - triangle[1][1][0]), color)
-        #pyxel.line(triangle[0][0][0],height-triangle[0][1][0],triangle[1][0][0],height-triangle[1][1][0],5)
+        #drawLine(int(triangle[0][0][0]), int(height - triangle[0][1][0]), int(triangle[1][0][0]), int(height - triangle[1][1][0]), color)
+        pyxel.line(triangle[0][0][0],height-triangle[0][1][0],triangle[1][0][0],height-triangle[1][1][0],color)
     if use!=0:
-        drawLine(int(triangle[1][0][0]),int(height-triangle[1][1][0]),int(triangle[2][0][0]),int(height-triangle[2][1][0]),color)
-        #pyxel.line(triangle[1][0][0],height-triangle[1][1][0],triangle[2][0][0],height-triangle[2][1][0],5)
+        #drawLine(int(triangle[1][0][0]),int(height-triangle[1][1][0]),int(triangle[2][0][0]),int(height-triangle[2][1][0]),color)
+        pyxel.line(triangle[1][0][0],height-triangle[1][1][0],triangle[2][0][0],height-triangle[2][1][0],color)
     if use!=1:
-        drawLine(int(triangle[2][0][0]),int(height-triangle[2][1][0]),int(triangle[0][0][0]),int(height-triangle[0][1][0]),color)
-        #pyxel.line(triangle[2][0][0],height-triangle[2][1][0],triangle[0][0][0],height-triangle[0][1][0],5)
+        #drawLine(int(triangle[2][0][0]),int(height-triangle[2][1][0]),int(triangle[0][0][0]),int(height-triangle[0][1][0]),color)
+        pyxel.line(triangle[2][0][0],height-triangle[2][1][0],triangle[0][0][0],height-triangle[0][1][0],color)
 
+    #pyxel.tri(int(triangle[0][0][0]), int(height - triangle[0][1][0]), int(triangle[1][0][0]), int(height - triangle[1][1][0]),int(triangle[2][0][0]),int(height-triangle[2][1][0]),4)
 
 def workTriangle(Triangle,j,color,axis):
-    outPoints=[0,0,0]
     out = 0
     place = 3
     inside = 0
@@ -383,17 +365,12 @@ def workTriangle(Triangle,j,color,axis):
 
     if out==3:
         pass
-
-
-
-
 j=0
 def update():
         pyxel.cls(0)
         updateView()
         updatePespective()
         global j
-
         for i in range(len(cubeMesh)):
             Triangle[i % 3][0] = (cubeMesh[i][0])
             Triangle[i % 3][1] = (cubeMesh[i][1])
@@ -414,8 +391,6 @@ def update():
                         workTriangle(Triangle,j, 11,1)
                     if i == 8 :
                         workTriangle(Triangle,j, 5,1)
-
-
         j+=1
         if j == 360:
             j=0
@@ -431,33 +406,35 @@ def quit():
     global camZangle
     global index
 
-    if pyxel.btnp(pyxel.KEY_W):
-        zcam+=0.2
-    if pyxel.btnp(pyxel.KEY_S):
-        zcam-=0.2
-    if pyxel.btnp(pyxel.KEY_A):
-        xcam+=0.2
-    if pyxel.btnp(pyxel.KEY_D):
-        xcam-=0.2
-    if pyxel.btnp(pyxel.KEY_Q):
-        ycam-=0.2
-    if pyxel.btnp(pyxel.KEY_E):
-        ycam+=0.2
+    if pyxel.btn(pyxel.KEY_W):
+        zcam+=0.05
+    if pyxel.btn(pyxel.KEY_S):
+        zcam-=0.05
+    if pyxel.btn(pyxel.KEY_A):
+        xcam+=0.05
+    if pyxel.btn(pyxel.KEY_D):
+        xcam-=0.05
+    if pyxel.btn(pyxel.KEY_Q):
+        ycam-=0.05
+    if pyxel.btn(pyxel.KEY_E):
+        ycam+=0.05
 
-    if pyxel.btnp(pyxel.KEY_I):
-        camXangle -= 4
-    if pyxel.btnp(pyxel.KEY_K):
-        camXangle += 4
-    if pyxel.btnp(pyxel.KEY_J):
-        camYangle -= 4
-    if pyxel.btnp(pyxel.KEY_L):
-        camYangle += 4
-    if pyxel.btnp(pyxel.KEY_U):
-        camZangle -= 4
-    if pyxel.btnp(pyxel.KEY_O):
-        camZangle +=4
+    if pyxel.btn(pyxel.KEY_I):
+        camXangle -= 2
+    if pyxel.btn(pyxel.KEY_K):
+        camXangle += 2
+    if pyxel.btn(pyxel.KEY_J):
+        camYangle -= 2
+    if pyxel.btn(pyxel.KEY_L):
+        camYangle += 2
+    if pyxel.btn(pyxel.KEY_U):
+        camZangle -= 2
+    if pyxel.btn(pyxel.KEY_O):
+        camZangle +=2
     if pyxel.btnp(pyxel.KEY_P):
         index=(index+1)%3
+
+pyxel.init(width, height,fps=120)
 
 pyxel.run(update, quit)
 
