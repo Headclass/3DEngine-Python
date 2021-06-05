@@ -14,5 +14,9 @@ Use JL keys to controll the yaw.
 Use UO keys to control the roll
 
 Use P key to switch between the projection matrices (small angle, wide angle, ortographic)
+
+Use B key to switch between line mode and triangle mode.
+
+Use T key to exit.
 # Dependencies
-Uses tkinter, math, and numpy packages.
+Uses Pyxel, math, and numpy packages.
