@@ -1,4 +1,3 @@
-# 3DEngine in tkinter
 A simple 3D engine which renders vertices in real time using a movable camera. Used to learn and understand the transformation between spaces and the subsequent projection onto screen. 
 
 The goal was to minimize the use of external libraries and blackbox frameworks and to showcase exactly what happens when a vertex is projected onto the screen. 
