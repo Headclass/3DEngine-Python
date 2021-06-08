@@ -66,8 +66,8 @@ camXangle, camYangle, camZangle = 0, 0, 0
 ViewMatrix = numpy.array([[1, 0, 0, 0], [0, 1, 0, -1], [0, 0, 1, -4], [0, 0, 0, 1]])
 
 curCamX=0
-curCamY=0
-curCamZ=0
+curCamY=1
+curCamZ=4
 def updateView():
     global ViewMatrix, xcam, ycam, zcam, camXangle, camYangle, camZangle
     CamyRotationMatrix = numpy.array([[math.cos(math.radians(camYangle)), 0, math.sin(math.radians(camYangle)), 0], [0, 1, 0, 0],[-math.sin(math.radians(camYangle)), 0, math.cos(math.radians(camYangle)), 0],[0, 0, 0, 1]])
@@ -307,22 +307,22 @@ def quit():
 
     if pyxel.btn(pyxel.KEY_W):
         zcam+=0.05
-        curCamZ+=0.05
+        curCamZ-=0.05
     if pyxel.btn(pyxel.KEY_S):
         zcam-=0.05
-        curCamZ -= 0.05
+        curCamZ += 0.05
     if pyxel.btn(pyxel.KEY_A):
         xcam+=0.05
-        curCamX += 0.05
+        curCamX -= 0.05
     if pyxel.btn(pyxel.KEY_D):
         xcam-=0.05
-        curCamX -= 0.05
+        curCamX += 0.05
     if pyxel.btn(pyxel.KEY_Q):
         ycam-=0.05
-        curCamY -= 0.05
+        curCamY += 0.05
     if pyxel.btn(pyxel.KEY_E):
         ycam+=0.05
-        curCamY += 0.05
+        curCamY -= 0.05
     if pyxel.btn(pyxel.KEY_I):
         camXangle -= 2
     if pyxel.btn(pyxel.KEY_K):
