@@ -10,12 +10,16 @@ Use IK keys to control the pitch.
 
 Use JL keys to controll the yaw.
 
-Use UO keys to control the roll
+Use UO keys to control the roll.
 
-# Other controls
+# Other controls.
 Use P key to switch between the projection matrices (small angle, wide angle, ortographic)
 
 Use B key to switch between line mode and triangle mode.
+
+Use H key to display the view matrix.
+
+Use C key to turn the rotation of the house on/off.
 
 Use T key to exit.
 # Dependencies
