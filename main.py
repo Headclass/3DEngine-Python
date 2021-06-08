@@ -3,7 +3,7 @@ import numpy
 import math
 import pyxel
 
-#Window dimensions
+#Window dimensions and framerate
 width = 255
 height = 255
 fps=60
@@ -27,7 +27,7 @@ cubeMesh=[
 [-0.5, 1., -0.5 ],[-0.5, 1., 0.5 ],[0, 2., 0 ]
 ]
 
-#Axes
+#Axes (x,y,z)
 axes = [[0, 0, 0],[0.7, 0, 0],[0, 0, 0],[0, 0, 0],[0, 0.7, 0],[0, 0, 0],[0, 0, 0],[0, 0, 0.7],[0, 0, 0]]
 
 
@@ -39,14 +39,17 @@ def homogenous(vertex):
 def transpose(vertex):
     return numpy.array([vertex]).T
 
+#Adjusting object vertices
 for i in range(len(cubeMesh)):
     homogenous(cubeMesh[i])               # Adding a homogenous coordinate
     cubeMesh[i] = transpose(cubeMesh[i])  # Changing a row vector to a column vector
 
+#Adjusting axes vertices
 for i in range(len(axes)):
     homogenous(axes[i])                   # Adding a homogenous coordinate
     axes[i] = transpose(axes[i])          # Changing a row vector to a column vector
 
+#Transforming the object from local space to world space
 def modelToWorld(vertex,x,y,z):
     xangle = math.radians(x)
     yangle = math.radians(y)
@@ -61,13 +64,20 @@ def modelToWorld(vertex,x,y,z):
     return numpy.dot(ModelMatrix,vertex)
 
 
+#Global variables for the camera movement
 xcam, ycam, zcam = 0, 0, 0
 camXangle, camYangle, camZangle = 0, 0, 0
-ViewMatrix = numpy.array([[1, 0, 0, 0], [0, 1, 0, -1], [0, 0, 1, -4], [0, 0, 0, 1]])
+ViewMatrix = numpy.array([[1, 0, 0, 0],
+                          [0, 1, 0, -1],
+                          [0, 0, 1, -4],
+                          [0, 0, 0, 1]])
+
+test_vector=numpy.array([0,0,0,1]).T
 
 curCamX=0
 curCamY=1
 curCamZ=4
+#Updating the current camera matrix by keyboard inputs
 def updateView():
     global ViewMatrix, xcam, ycam, zcam, camXangle, camYangle, camZangle
     CamyRotationMatrix = numpy.array([[math.cos(math.radians(camYangle)), 0, math.sin(math.radians(camYangle)), 0], [0, 1, 0, 0],[-math.sin(math.radians(camYangle)), 0, math.cos(math.radians(camYangle)), 0],[0, 0, 0, 1]])
@@ -82,59 +92,68 @@ def updateView():
     camXangle, camYangle, camZangle = 0, 0, 0
 
 index = 0
+#Depending on the mode of view, a different projection matrix is used
 def updatePespective():
     global ProjectionMatrix,index
+    #Normal projection
     if index==0:
         ProjectionMatrix = numpy.array([[1.2,0,0,0], [0,1.2,0,0],[0,0,-1.04,-0.41],[0,0,-1,0]])
+    #Wide angle projection
     if index==1:
         ProjectionMatrix = numpy.array([[0.33,0,0,0], [0,0.33,0,0],[0,0,-1.00,-0.20],[0,0,-1,0]])
+    #Ortographic projection
     if index==2:
         ProjectionMatrix = numpy.array([[0.25,0,0,0], [0,0.25,0,0],[0,0,-0.22,-1.22],[0,0,0,1]])
 
+#Transforming from world space to view space
 def worldToView(vertex):
     global ModelView
     ModelView = numpy.dot(ViewMatrix,vertex)
     return ModelView
 
+#Transforming from view space to clip space
 def viewToClip(vertex):
     return numpy.dot(ProjectionMatrix,vertex)
 
+#Dividing by W
 def perspectiveDivision(vertex):
     for j in range(4):
         vertex[j]=vertex[j]/vertex[3]
     return vertex
 
+#Transforming to window size
 def viewportTransformation(vertex):
     vertex[0] = (vertex[0] * 0.5 + 0.5) * width
     vertex[1] = (vertex[1] * 0.5 + 0.5) * height
     return vertex
 
+#Rounding
 def roundPixel(vertex):
     vertex[0]=  round(float(vertex[0][0]))
     vertex[1] = round(float(vertex[1][0]))
     return vertex
 
+#List of triangles to be sorted due to the painter's algorithm
 triangles=[]
+#List of surface normals
 normals=[]
-polygoncenters=[]
 def drawTriangle(triangle,color,use):
     global triangles
-    triangleXcenter=(triangle[0][0][0]+triangle[1][0][0]+triangle[2][0][0])/3
-    triangleYcenter=(triangle[0][1][0]+triangle[1][1][0]+triangle[2][1][0])/3
-    triangleZcenter=(triangle[0][2][0]+triangle[1][2][0]+triangle[2][2][0])/3
     triangles.append([triangle,color,use,max(triangle[0][2][0],triangle[1][2][0],triangle[2][2][0])])
-    pass
+
+#Counter of triangles
 counter=0
 def rasterize(triangle,color,use):
     global counter
 
+    #Incorrect flat shading / needs rework
     if mode == 1:
         lookat=(ViewMatrix[:,2][:3].T)*-1
         lookat=lookat/numpy.linalg.norm(lookat)
         cur_normal=triangles[counter][4]*-1
         cur_normal=cur_normal/numpy.linalg.norm(cur_normal)
-        asdf=abs(float(numpy.dot(cur_normal,lookat)))
-        final=int(asdf*11)+4
+        final_value=abs(float(numpy.dot(cur_normal,lookat)))
+        final=int(final_value*11)+4
 
         pyxel.tri(int(triangle[0][0][0]), int(height - triangle[0][1][0]), int(triangle[1][0][0]), int(height - triangle[1][1][0]),int(triangle[2][0][0]),int(height-triangle[2][1][0]),final)
         counter += 1
@@ -153,6 +172,7 @@ def workTriangle(Triangle,j,color,axis):
     out = 0
     place = 3
     inside = 0
+    #J is a rotation constant - we want the axes to remain stationary
     if axis:
         j=0
     if not axis:
@@ -168,6 +188,8 @@ def workTriangle(Triangle,j,color,axis):
     for i in range(3):
         Triangle[i] = worldToView(Triangle[i])  # Moving the world relative to our camera ("moving" the camera)
         Triangle[i] = viewToClip(Triangle[i])  # Applying projection
+
+    #Finding out which vertices are before the near plane
     if -Triangle[0][3] > Triangle[0][2]:
         out+=1
         inside=0
@@ -183,6 +205,8 @@ def workTriangle(Triangle,j,color,axis):
         inside = 2
     else:
         place = 2
+
+    #Near plane clipping
     if out==0:
         for i in range(3):
             Triangle[i] = perspectiveDivision(Triangle[i])  # Dividing by W to get to normalised device coordinates
@@ -298,8 +322,12 @@ def update():
         normals=[]
         counter=0
 
+#Projection mode (normal, wide angle, ortographic)
 mode = 0
+#Rotation of the house
 turnedoff=1
+
+#Key bindings
 def quit():
     if pyxel.btnp(pyxel.KEY_T):
         pyxel.quit()
@@ -307,22 +335,16 @@ def quit():
 
     if pyxel.btn(pyxel.KEY_W):
         zcam+=0.05
-        curCamZ-=0.05
     if pyxel.btn(pyxel.KEY_S):
         zcam-=0.05
-        curCamZ += 0.05
     if pyxel.btn(pyxel.KEY_A):
         xcam+=0.05
-        curCamX -= 0.05
     if pyxel.btn(pyxel.KEY_D):
         xcam-=0.05
-        curCamX += 0.05
     if pyxel.btn(pyxel.KEY_Q):
         ycam-=0.05
-        curCamY += 0.05
     if pyxel.btn(pyxel.KEY_E):
         ycam+=0.05
-        curCamY -= 0.05
     if pyxel.btn(pyxel.KEY_I):
         camXangle -= 2
     if pyxel.btn(pyxel.KEY_K):
