@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import numpy
 import math
 import pyxel
@@ -5,37 +6,36 @@ import pyxel
 #Window dimensions
 width = 255
 height = 255
+fps=60
 
-#Vertexes of the object
+#Vertices of the object
 cubeMesh=[
 #Ground
-[-2, 0, -2],[2, 0, -2],[-2, 0, 2],
-[-2, 0, 2],[2, 0, -2],[2, 0, 2],
-
+[-2, 0, -2],[2, 0, -2],[-2, 0, 2],[-2, 0, 2],[2, 0, -2],[2, 0, 2],
 #House
-[-0.5, 0., 0.5 ],[0.5, 0., 0.5 ],[0.5, 1., 0.5 ],[-0.5, 0., 0.5 ],[0.5, 1., 0.5 ],[-0.5, 1., 0.5 ],[0.5, 0., 0.5 ],[0.5, 0., -0.5 ],[0.5, 1., -0.5 ],[0.5, 0., 0.5 ],[0.5, 1., -0.5 ],[0.5, 1., 0.5 ],[0.5, 0., -0.5 ],[-0.5, 0., -0.5 ],[0.5, 1., -0.5 ],[-0.5, 0., -0.5 ],[-0.5, 1., -0.5 ],[0.5, 1., -0.5 ],[-0.5, 0., -0.5 ],[-0.5, 0., 0.5 ],[-0.5, 1., 0.5 ],[-0.5, 0., -0.5 ],[-0.5, 1., 0.5 ],[-0.5, 1., -0.5 ],[-0.5, 1., 0.5 ],[0.5, 1., 0.5 ],[0, 2., 0 ],[0.5, 1., 0.5 ],[0.5, 1., -0.5 ],[0, 2., 0 ],[0.5, 1., -0.5 ],[-0.5, 1., -0.5 ],[0, 2., 0 ],[-0.5, 1., -0.5 ],[-0.5, 1., 0.5 ],[0, 2., 0 ]]
-#Axes
-axes = [
-    #x
-[0, 0, 0],
-[0.7, 0, 0],
-[0, 0, 0],
-    #y
-[0, 0, 0],
-[0, 0.7, 0],
-[0, 0, 0],
-    #z
-[0, 0, 0],
-[0, 0, 0.7],
-[0, 0, 0]
+[-0.5, 0., 0.5 ],[0.5, 0., 0.5 ],[0.5, 1., 0.5 ],
+[-0.5, 0., 0.5 ],[0.5, 1., 0.5 ],[-0.5, 1., 0.5 ],
+[0.5, 0., 0.5 ],[0.5, 0., -0.5 ],[0.5, 1., -0.5 ],
+[0.5, 0., 0.5 ],[0.5, 1., -0.5 ],[0.5, 1., 0.5 ],
+[0.5, 0., -0.5 ],[-0.5, 0., -0.5 ],[0.5, 1., -0.5 ],
+[-0.5, 0., -0.5 ],[-0.5, 1., -0.5 ],[0.5, 1., -0.5 ],
+[-0.5, 0., -0.5 ],[-0.5, 0., 0.5 ],[-0.5, 1., 0.5 ],
+[-0.5, 0., -0.5 ],[-0.5, 1., 0.5 ],[-0.5, 1., -0.5 ],
+[-0.5, 1., 0.5 ],[0.5, 1., 0.5 ],[0, 2., 0 ],
+[0.5, 1., 0.5 ],[0.5, 1., -0.5 ],[0, 2., 0 ],
+[0.5, 1., -0.5 ],[-0.5, 1., -0.5 ],[0, 2., 0 ],
+[-0.5, 1., -0.5 ],[-0.5, 1., 0.5 ],[0, 2., 0 ]
 ]
 
+#Axes
+axes = [[0, 0, 0],[0.7, 0, 0],[0, 0, 0],[0, 0, 0],[0, 0.7, 0],[0, 0, 0],[0, 0, 0],[0, 0, 0.7],[0, 0, 0]]
 
-#Adding a homogenous coordinate to all vertexes (w)
+
+#Adding a homogenous coordinate (w=1) to all vertices
 def homogenous(vertex):
     vertex.append(1)
 
-#Transforming row major vertexes to column major vertexes
+#Transforming row major vertices to column major vertexes
 def transpose(vertex):
     return numpy.array([vertex]).T
 
@@ -64,6 +64,10 @@ def modelToWorld(vertex,x,y,z):
 xcam, ycam, zcam = 0, 0, 0
 camXangle, camYangle, camZangle = 0, 0, 0
 ViewMatrix = numpy.array([[1, 0, 0, 0], [0, 1, 0, -1], [0, 0, 1, -4], [0, 0, 0, 1]])
+
+curCamX=0
+curCamY=0
+curCamZ=0
 def updateView():
     global ViewMatrix, xcam, ycam, zcam, camXangle, camYangle, camZangle
     CamyRotationMatrix = numpy.array([[math.cos(math.radians(camYangle)), 0, math.sin(math.radians(camYangle)), 0], [0, 1, 0, 0],[-math.sin(math.radians(camYangle)), 0, math.cos(math.radians(camYangle)), 0],[0, 0, 0, 1]])
@@ -86,7 +90,6 @@ def updatePespective():
         ProjectionMatrix = numpy.array([[0.33,0,0,0], [0,0.33,0,0],[0,0,-1.00,-0.20],[0,0,-1,0]])
     if index==2:
         ProjectionMatrix = numpy.array([[0.25,0,0,0], [0,0.25,0,0],[0,0,-0.22,-1.22],[0,0,0,1]])
-ModelView = numpy.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
 
 def worldToView(vertex):
     global ModelView
@@ -113,10 +116,14 @@ def roundPixel(vertex):
 
 triangles=[]
 normals=[]
+polygoncenters=[]
 def drawTriangle(triangle,color,use):
     global triangles
+    triangleXcenter=(triangle[0][0][0]+triangle[1][0][0]+triangle[2][0][0])/3
+    triangleYcenter=(triangle[0][1][0]+triangle[1][1][0]+triangle[2][1][0])/3
+    triangleZcenter=(triangle[0][2][0]+triangle[1][2][0]+triangle[2][2][0])/3
     triangles.append([triangle,color,use,max(triangle[0][2][0],triangle[1][2][0],triangle[2][2][0])])
-
+    pass
 counter=0
 def rasterize(triangle,color,use):
     global counter
@@ -134,25 +141,26 @@ def rasterize(triangle,color,use):
 
     else:
         if use!=2:
-            #drawLine(int(triangle[0][0][0]), int(height - triangle[0][1][0]), int(triangle[1][0][0]), int(height - triangle[1][1][0]), color)
             pyxel.line(triangle[0][0][0],height-triangle[0][1][0],triangle[1][0][0],height-triangle[1][1][0],color)
         if use!=0:
-            #drawLine(int(triangle[1][0][0]),int(height-triangle[1][1][0]),int(triangle[2][0][0]),int(height-triangle[2][1][0]),color)
             pyxel.line(triangle[1][0][0],height-triangle[1][1][0],triangle[2][0][0],height-triangle[2][1][0],color)
         if use!=1:
-            #drawLine(int(triangle[2][0][0]),int(height-triangle[2][1][0]),int(triangle[0][0][0]),int(height-triangle[0][1][0]),color)
             pyxel.line(triangle[2][0][0],height-triangle[2][1][0],triangle[0][0][0],height-triangle[0][1][0],color)
 
 
 def workTriangle(Triangle,j,color,axis):
-    global normals
+    global normals,turnedoff
     out = 0
     place = 3
     inside = 0
     if axis:
         j=0
-    for i in range(3):
-        Triangle[i] = modelToWorld(Triangle[i], 0, j, 0)
+    if not axis:
+        for i in range(3):
+            Triangle[i] = modelToWorld(Triangle[i], 0, j, 0)
+    else:
+        for i in range(3):
+            Triangle[i] = modelToWorld(Triangle[i], 0, 0, 0)
     first = (Triangle[1] - Triangle[0])[:3].T
     second = (Triangle[2] - Triangle[0])[:3].T
     normal = numpy.cross(first, second)
@@ -227,15 +235,9 @@ def workTriangle(Triangle,j,color,axis):
         t01=(  -Triangle[(place+1)%3][3]-Triangle[(place+1)%3][2] ) / ( Triangle[place][3] - Triangle[(place+1)%3][3] + Triangle[(place)][2] - Triangle[(place+1)%3][2]  )
         t02=(  -Triangle[(place+2)%3][3]-Triangle[(place+2)%3][2] ) / ( Triangle[place][3] - Triangle[(place+2)%3][3] + Triangle[(place)][2] - Triangle[(place+2)%3][2]  )
 
-        Triangle[(place + 1) % 3][0] = Triangle[(place + 1) % 3][0] + t01*(Triangle[place][0] - Triangle[(place+1)%3][0])
-        Triangle[(place + 1) % 3][1] = Triangle[(place + 1) % 3][1] + t01*(Triangle[place][1] - Triangle[(place+1)%3][1])
-        Triangle[(place + 1) % 3][2] = Triangle[(place + 1) % 3][2] + t01*(Triangle[place][2] - Triangle[(place+1)%3][2])
-        Triangle[(place + 1) % 3][3] = Triangle[(place + 1) % 3][3] + t01*(Triangle[place][3] - Triangle[(place+1)%3][3])
-
-        Triangle[(place + 2) % 3][0] = Triangle[(place + 2) % 3][0] + t02*(Triangle[place][0] - Triangle[(place+2)%3][0])
-        Triangle[(place + 2) % 3][1] = Triangle[(place + 2) % 3][1] + t02*(Triangle[place][1] - Triangle[(place+2)%3][1])
-        Triangle[(place + 2) % 3][2] = Triangle[(place + 2) % 3][2] + t02*(Triangle[place][2] - Triangle[(place+2)%3][2])
-        Triangle[(place + 2) % 3][3] = Triangle[(place + 2) % 3][3] + t02*(Triangle[place][3] - Triangle[(place+2)%3][3])
+        for i in range(4):
+            Triangle[(place + 1) % 3][i] = Triangle[(place + 1) % 3][i] + t01 * (Triangle[place][i] - Triangle[(place + 1) % 3][i])
+            Triangle[(place + 2) % 3][i] = Triangle[(place + 2) % 3][i] + t02 * (Triangle[place][i] - Triangle[(place + 2) % 3][i])
 
         for i in range(3):
             Triangle[i] = perspectiveDivision(Triangle[i])  # Dividing by W to get to normalised device coordinates
@@ -251,8 +253,11 @@ def update():
         global j,triangles, normals,counter
         # An empty triangle
         Triangle = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+        # Fill the screen with black color (clear it)
         pyxel.cls(0)
+        # Update the view matrix according to the current camera rotation and position
         updateView()
+        # Update the projection matrix according to the currently chosen perspective (normal, wide, ortographic)
         updatePespective()
         for i in range(len(cubeMesh)):
             Triangle[i % 3][0] = (cubeMesh[i][0])
@@ -262,6 +267,7 @@ def update():
             if i % 3 == 2:
                 workTriangle(Triangle,j,13,0)
                 Triangle = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+        #If axes are shown in wireframe mode
         if mode == 0:
             for i in range(len(axes)):
                 Triangle[i % 3][0] = (axes[i][0])
@@ -278,12 +284,13 @@ def update():
                         if i == 8 :
                             workTriangle(Triangle,j, 3,1)
                             Triangle = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
-
-        j+=1
-        if j == 360:
+        if not turnedoff:
+            j+=1
+        if j == 361:
             j=0
         for o in range(len(triangles)):
             triangles[o].append(normals[o])
+        #Sort the list in Z order for the painter algorithm
         triangles.sort(key=lambda item : item[3],reverse=True)
         for k in triangles:
             rasterize(k[0],k[1],k[2])
@@ -292,23 +299,30 @@ def update():
         counter=0
 
 mode = 0
+turnedoff=1
 def quit():
     if pyxel.btnp(pyxel.KEY_T):
         pyxel.quit()
-    global xcam,ycam,zcam,camXangle,camYangle,camZangle,index,mode
+    global xcam,ycam,zcam,camXangle,camYangle,camZangle,index,mode,turnedoff,curCamX,curCamY,curCamZ
 
     if pyxel.btn(pyxel.KEY_W):
         zcam+=0.05
+        curCamZ+=0.05
     if pyxel.btn(pyxel.KEY_S):
         zcam-=0.05
+        curCamZ -= 0.05
     if pyxel.btn(pyxel.KEY_A):
         xcam+=0.05
+        curCamX += 0.05
     if pyxel.btn(pyxel.KEY_D):
         xcam-=0.05
+        curCamX -= 0.05
     if pyxel.btn(pyxel.KEY_Q):
         ycam-=0.05
+        curCamY -= 0.05
     if pyxel.btn(pyxel.KEY_E):
         ycam+=0.05
+        curCamY += 0.05
     if pyxel.btn(pyxel.KEY_I):
         camXangle -= 2
     if pyxel.btn(pyxel.KEY_K):
@@ -324,11 +338,15 @@ def quit():
     if pyxel.btnp(pyxel.KEY_P):
         index=(index+1)%3
     if pyxel.btnp(pyxel.KEY_H):
+        print()
         print(ViewMatrix)
+        print()
     if pyxel.btnp(pyxel.KEY_B):
         mode=(mode+1)%2
+    if pyxel.btnp(pyxel.KEY_C):
+        turnedoff=(turnedoff+1)%2
 
-pyxel.init(width, height,fps=60,palette=[0x000000,0xFF0000, 0x00FF00, 0x0000FF, 0x333333, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xAAAAAA, 0xBBBBBB, 0xCCCCCC, 0xDDDDDD, 0xEEEEEE, 0xFFFFFF])
+pyxel.init(width, height,fps=fps,palette=[0x000000,0xFF0000, 0x00FF00, 0x0000FF, 0x333333, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xAAAAAA, 0xBBBBBB, 0xCCCCCC, 0xDDDDDD, 0xEEEEEE, 0xFFFFFF])
 
 pyxel.run(update, quit)
 
