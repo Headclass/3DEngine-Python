@@ -9,7 +9,7 @@ height = 255
 fps=60
 
 #Vertices of the object
-cubeMesh1=[
+House=[
 #Ground
 [-2, 0, -2],[2, 0, -2],[-2, 0, 2],[-2, 0, 2],[2, 0, -2],[2, 0, 2],
 #House
@@ -27,7 +27,10 @@ cubeMesh1=[
 [-0.5, 1., -0.5 ],[-0.5, 1., 0.5 ],[0, 2., 0 ]
 ]
 
-cubeMesh=[[0.850651, 0.0, 0.525731], [0.850651, 0.0, -0.525731], [0.525731, 0.850651, 0.0], [0.850651, 0.0, 0.525731], [0.525731, -0.850651, 0.0], [0.850651, 0.0, -0.525731], [-0.850651, 0.0, -0.525731], [-0.850651, 0.0, 0.525731], [-0.525731, 0.850651, 0.0], [-0.850651, 0.0, 0.525731], [-0.850651, 0.0, -0.525731], [-0.525731, -0.850651, 0.0], [0.525731, 0.850651, 0.0], [-0.525731, 0.850651, 0.0], [0.0, 0.525731, 0.850651], [-0.525731, 0.850651, 0.0], [0.525731, 0.850651, 0.0], [0.0, 0.525731, -0.850651], [0.0, -0.525731, -0.850651], [0.0, 0.525731, -0.850651], [0.850651, 0.0, -0.525731], [0.0, 0.525731, -0.850651], [0.0, -0.525731, -0.850651], [-0.850651, 0.0, -0.525731], [0.525731, -0.850651, 0.0], [-0.525731, -0.850651, 0.0], [0.0, -0.525731, -0.850651], [-0.525731, -0.850651, 0.0], [0.525731, -0.850651, 0.0], [0.0, -0.525731, 0.850651], [0.0, 0.525731, 0.850651], [0.0, -0.525731, 0.850651], [0.850651, 0.0, 0.525731], [0.0, -0.525731, 0.850651], [0.0, 0.525731, 0.850651], [-0.850651, 0.0, 0.525731], [0.525731, 0.850651, 0.0], [0.850651, 0.0, -0.525731], [0.0, 0.525731, -0.850651], [0.850651, 0.0, 0.525731], [0.525731, 0.850651, 0.0], [0.0, 0.525731, 0.850651], [-0.850651, 0.0, -0.525731], [-0.525731, 0.850651, 0.0], [0.0, 0.525731, -0.850651], [-0.525731, 0.850651, 0.0], [-0.850651, 0.0, 0.525731], [0.0, 0.525731, 0.850651], [0.850651, 0.0, -0.525731], [0.525731, -0.850651, 0.0], [0.0, -0.525731, -0.850651], [0.525731, -0.850651, 0.0], [0.850651, 0.0, 0.525731], [0.0, -0.525731, 0.850651], [-0.850651, 0.0, -0.525731], [0.0, -0.525731, -0.850651], [-0.525731, -0.850651, 0.0], [-0.850651, 0.0, 0.525731], [-0.525731, -0.850651, 0.0], [0.0, -0.525731, 0.850651]]
+icosahedron=[[0.850651, 0.0, 0.525731], [0.850651, 0.0, -0.525731], [0.525731, 0.850651, 0.0], [0.850651, 0.0, 0.525731], [0.525731, -0.850651, 0.0], [0.850651, 0.0, -0.525731], [-0.850651, 0.0, -0.525731], [-0.850651, 0.0, 0.525731], [-0.525731, 0.850651, 0.0], [-0.850651, 0.0, 0.525731], [-0.850651, 0.0, -0.525731], [-0.525731, -0.850651, 0.0], [0.525731, 0.850651, 0.0], [-0.525731, 0.850651, 0.0], [0.0, 0.525731, 0.850651], [-0.525731, 0.850651, 0.0], [0.525731, 0.850651, 0.0], [0.0, 0.525731, -0.850651], [0.0, -0.525731, -0.850651], [0.0, 0.525731, -0.850651], [0.850651, 0.0, -0.525731], [0.0, 0.525731, -0.850651], [0.0, -0.525731, -0.850651], [-0.850651, 0.0, -0.525731], [0.525731, -0.850651, 0.0], [-0.525731, -0.850651, 0.0], [0.0, -0.525731, -0.850651], [-0.525731, -0.850651, 0.0], [0.525731, -0.850651, 0.0], [0.0, -0.525731, 0.850651], [0.0, 0.525731, 0.850651], [0.0, -0.525731, 0.850651], [0.850651, 0.0, 0.525731], [0.0, -0.525731, 0.850651], [0.0, 0.525731, 0.850651], [-0.850651, 0.0, 0.525731], [0.525731, 0.850651, 0.0], [0.850651, 0.0, -0.525731], [0.0, 0.525731, -0.850651], [0.850651, 0.0, 0.525731], [0.525731, 0.850651, 0.0], [0.0, 0.525731, 0.850651], [-0.850651, 0.0, -0.525731], [-0.525731, 0.850651, 0.0], [0.0, 0.525731, -0.850651], [-0.525731, 0.850651, 0.0], [-0.850651, 0.0, 0.525731], [0.0, 0.525731, 0.850651], [0.850651, 0.0, -0.525731], [0.525731, -0.850651, 0.0], [0.0, -0.525731, -0.850651], [0.525731, -0.850651, 0.0], [0.850651, 0.0, 0.525731], [0.0, -0.525731, 0.850651], [-0.850651, 0.0, -0.525731], [0.0, -0.525731, -0.850651], [-0.525731, -0.850651, 0.0], [-0.850651, 0.0, 0.525731], [-0.525731, -0.850651, 0.0], [0.0, -0.525731, 0.850651]]
+
+
+cubeMesh=House
 
 #Axes (x,y,z)
 axes = [[0, 0, 0],[0.7, 0, 0],[0, 0, 0],[0, 0, 0],[0, 0.7, 0],[0, 0, 0],[0, 0, 0],[0, 0, 0.7],[0, 0, 0]]
@@ -42,14 +45,26 @@ def transpose(vertex):
     return numpy.array([vertex]).T
 
 #Adjusting object vertices
-for i in range(len(cubeMesh)):
-    homogenous(cubeMesh[i])               # Adding a homogenous coordinate
-    cubeMesh[i] = transpose(cubeMesh[i])  # Changing a row vector to a column vector
+for i in range(len(House)):
+    homogenous(House[i])               # Adding a homogenous coordinate
+    House[i] = transpose(House[i])  # Changing a row vector to a column vector
+
+#Adjusting object vertices
+for i in range(len(icosahedron)):
+    homogenous(icosahedron[i])               # Adding a homogenous coordinate
+    icosahedron[i] = transpose(icosahedron[i])  # Changing a row vector to a column vector
 
 #Adjusting axes vertices
 for i in range(len(axes)):
     homogenous(axes[i])                   # Adding a homogenous coordinate
     axes[i] = transpose(axes[i])          # Changing a row vector to a column vector
+
+def meshChange():
+    global cubeMesh
+    if mesh==0:
+        cubeMesh=House
+    else:
+        cubeMesh=icosahedron
 
 #Transforming the object from local space to world space
 def modelToWorld(vertex,x,y,z):
@@ -297,6 +312,8 @@ def update():
         updateView()
         # Update the projection matrix according to the currently chosen perspective (normal, wide, ortographic)
         updatePespective()
+        # Update the choice of mesh
+        meshChange()
 
         for i in range(len(cubeMesh)):
             Triangle[i % 3][0] = (cubeMesh[i][0])
@@ -359,12 +376,13 @@ def update():
 mode = 0
 #Rotation of the house
 turnedoff=1
-
+#Model choice
+mesh=0
 #Key bindings
 def quit():
     if pyxel.btnp(pyxel.KEY_T):
         pyxel.quit()
-    global xcam,ycam,zcam,camXangle,camYangle,camZangle,index,mode,turnedoff,curCamX,curCamY,curCamZ
+    global xcam,ycam,zcam,camXangle,camYangle,camZangle,index,mode,turnedoff,curCamX,curCamY,curCamZ,mesh
 
     if pyxel.btn(pyxel.KEY_W):
         zcam+=0.05
@@ -393,10 +411,7 @@ def quit():
     if pyxel.btnp(pyxel.KEY_P):
         index=(index+1)%3
     if pyxel.btnp(pyxel.KEY_H):
-        print()
-        print(numpy.dot(numpy.linalg.inv(ViewMatrix),test_vector))
-        print(numpy.dot(numpy.linalg.inv(ViewMatrix),numpy.array([0,0,-1,0]).T))
-        print()
+        mesh=(mesh+1)%2
     if pyxel.btnp(pyxel.KEY_B):
         mode=(mode+1)%2
     if pyxel.btnp(pyxel.KEY_C):
