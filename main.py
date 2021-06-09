@@ -9,7 +9,7 @@ height = 255
 fps=60
 
 #Vertices of the object
-cubeMesh=[
+cubeMesh1=[
 #Ground
 [-2, 0, -2],[2, 0, -2],[-2, 0, 2],[-2, 0, 2],[2, 0, -2],[2, 0, 2],
 #House
@@ -26,6 +26,8 @@ cubeMesh=[
 [0.5, 1., -0.5 ],[-0.5, 1., -0.5 ],[0, 2., 0 ],
 [-0.5, 1., -0.5 ],[-0.5, 1., 0.5 ],[0, 2., 0 ]
 ]
+
+cubeMesh=[[0.850651, 0.0, 0.525731], [0.850651, 0.0, -0.525731], [0.525731, 0.850651, 0.0], [0.850651, 0.0, 0.525731], [0.525731, -0.850651, 0.0], [0.850651, 0.0, -0.525731], [-0.850651, 0.0, -0.525731], [-0.850651, 0.0, 0.525731], [-0.525731, 0.850651, 0.0], [-0.850651, 0.0, 0.525731], [-0.850651, 0.0, -0.525731], [-0.525731, -0.850651, 0.0], [0.525731, 0.850651, 0.0], [-0.525731, 0.850651, 0.0], [0.0, 0.525731, 0.850651], [-0.525731, 0.850651, 0.0], [0.525731, 0.850651, 0.0], [0.0, 0.525731, -0.850651], [0.0, -0.525731, -0.850651], [0.0, 0.525731, -0.850651], [0.850651, 0.0, -0.525731], [0.0, 0.525731, -0.850651], [0.0, -0.525731, -0.850651], [-0.850651, 0.0, -0.525731], [0.525731, -0.850651, 0.0], [-0.525731, -0.850651, 0.0], [0.0, -0.525731, -0.850651], [-0.525731, -0.850651, 0.0], [0.525731, -0.850651, 0.0], [0.0, -0.525731, 0.850651], [0.0, 0.525731, 0.850651], [0.0, -0.525731, 0.850651], [0.850651, 0.0, 0.525731], [0.0, -0.525731, 0.850651], [0.0, 0.525731, 0.850651], [-0.850651, 0.0, 0.525731], [0.525731, 0.850651, 0.0], [0.850651, 0.0, -0.525731], [0.0, 0.525731, -0.850651], [0.850651, 0.0, 0.525731], [0.525731, 0.850651, 0.0], [0.0, 0.525731, 0.850651], [-0.850651, 0.0, -0.525731], [-0.525731, 0.850651, 0.0], [0.0, 0.525731, -0.850651], [-0.525731, 0.850651, 0.0], [-0.850651, 0.0, 0.525731], [0.0, 0.525731, 0.850651], [0.850651, 0.0, -0.525731], [0.525731, -0.850651, 0.0], [0.0, -0.525731, -0.850651], [0.525731, -0.850651, 0.0], [0.850651, 0.0, 0.525731], [0.0, -0.525731, 0.850651], [-0.850651, 0.0, -0.525731], [0.0, -0.525731, -0.850651], [-0.525731, -0.850651, 0.0], [-0.850651, 0.0, 0.525731], [-0.525731, -0.850651, 0.0], [0.0, -0.525731, 0.850651]]
 
 #Axes (x,y,z)
 axes = [[0, 0, 0],[0.7, 0, 0],[0, 0, 0],[0, 0, 0],[0, 0.7, 0],[0, 0, 0],[0, 0, 0],[0, 0, 0.7],[0, 0, 0]]
@@ -137,22 +139,25 @@ def roundPixel(vertex):
 triangles=[]
 #List of surface normals
 normals=[]
+#List of midpoints of triangles
+mids=[]
 def drawTriangle(triangle,color,use):
     global triangles
     triangles.append([triangle,color,use,max(triangle[0][2][0],triangle[1][2][0],triangle[2][2][0])])
 
 #Counter of triangles
 counter=0
-def rasterize(triangle,color,use):
+def rasterize(triangle,color,use,normal,mid):
     global counter
 
     #Incorrect flat shading / needs rework
     if mode == 1:
-        lookat=(ViewMatrix[:,2][:3].T)*-1
-        lookat=lookat/numpy.linalg.norm(lookat)
+        cam_pos=numpy.dot(numpy.linalg.inv(ViewMatrix), test_vector)
+        light=cam_pos-mid
+        light=(light/numpy.linalg.norm(light))[0][:3]
         cur_normal=triangles[counter][4]*-1
         cur_normal=cur_normal/numpy.linalg.norm(cur_normal)
-        final_value=abs(float(numpy.dot(cur_normal,lookat)))
+        final_value=abs(float(numpy.dot(cur_normal,light)))
         final=int(final_value*11)+4
 
         pyxel.tri(int(triangle[0][0][0]), int(height - triangle[0][1][0]), int(triangle[1][0][0]), int(height - triangle[1][1][0]),int(triangle[2][0][0]),int(height-triangle[2][1][0]),final)
@@ -168,7 +173,7 @@ def rasterize(triangle,color,use):
 
 
 def workTriangle(Triangle,j,color,axis):
-    global normals,turnedoff
+    global normals,turnedoff,mids
     out = 0
     place = 3
     inside = 0
@@ -183,7 +188,12 @@ def workTriangle(Triangle,j,color,axis):
             Triangle[i] = modelToWorld(Triangle[i], 0, 0, 0)
     first = (Triangle[1] - Triangle[0])[:3].T
     second = (Triangle[2] - Triangle[0])[:3].T
+    midX=(Triangle[0][0]+Triangle[1][0]+Triangle[2][0])/3
+    midY=(Triangle[0][1]+Triangle[1][1]+Triangle[2][1])/3
+    midZ=(Triangle[0][2]+Triangle[1][2]+Triangle[2][2])/3
+    midW=(Triangle[0][3]+Triangle[1][3]+Triangle[2][3])/3
     normal = numpy.cross(first, second)
+    mid=numpy.array([midX,midY,midZ,midW]).T
 
     for i in range(3):
         Triangle[i] = worldToView(Triangle[i])  # Moving the world relative to our camera ("moving" the camera)
@@ -213,6 +223,7 @@ def workTriangle(Triangle,j,color,axis):
             Triangle[i] = viewportTransformation(Triangle[i])  # Changing the normalised device coordinates to pixels on the screen
             Triangle[i] = roundPixel(Triangle[i])  # Rounding the resulting values to nearest pixel
         normals.append(normal)
+        mids.append(mid)
         drawTriangle(Triangle,color,3)
     if out==1:
         place = inside
@@ -243,6 +254,7 @@ def workTriangle(Triangle,j,color,axis):
             Triangle[i] = viewportTransformation(Triangle[i])  # Changing the normalised device coordinates to pixels on the screen
             Triangle[i] = roundPixel(Triangle[i])  # Rounding the resulting values to nearest pixel
         normals.append(normal)
+        mids.append(mid)
         drawTriangle(Triangle, color,1)
         Triangle = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
         Triangle[0] = Swap3
@@ -253,6 +265,7 @@ def workTriangle(Triangle,j,color,axis):
             Triangle[i] = viewportTransformation(Triangle[i])  # Changing the normalised device coordinates to pixels on the screen
             Triangle[i] = roundPixel(Triangle[i])  # Rounding the resulting values to nearest pixel
         normals.append(normal)
+        mids.append(mid)
         drawTriangle(Triangle, color,1)
 
     if out==2:
@@ -268,13 +281,14 @@ def workTriangle(Triangle,j,color,axis):
             Triangle[i] = viewportTransformation(Triangle[i])  # Changing the normalised device coordinates to pixels on the screen
             Triangle[i] = roundPixel(Triangle[i])  # Rounding the resulting values to nearest pixel
         normals.append(normal)
+        mids.append(mid)
         drawTriangle(Triangle, color,4)
 
     if out==3:
         pass
 j=0
 def update():
-        global j,triangles, normals,counter
+        global j,triangles, normals,counter,mids
         # An empty triangle
         Triangle = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
         # Fill the screen with black color (clear it)
@@ -283,6 +297,7 @@ def update():
         updateView()
         # Update the projection matrix according to the currently chosen perspective (normal, wide, ortographic)
         updatePespective()
+
         for i in range(len(cubeMesh)):
             Triangle[i % 3][0] = (cubeMesh[i][0])
             Triangle[i % 3][1] = (cubeMesh[i][1])
@@ -314,12 +329,30 @@ def update():
             j=0
         for o in range(len(triangles)):
             triangles[o].append(normals[o])
+            triangles[o].append(mids[o])
         #Sort the list in Z order for the painter algorithm
         triangles.sort(key=lambda item : item[3],reverse=True)
         for k in triangles:
-            rasterize(k[0],k[1],k[2])
+            rasterize(k[0],k[1],k[2],k[4],k[5])
+
+        pyxel.text(5, 5, "Location", 15)
+        pyxel.text(5, 15,"X:", 15)
+        pyxel.text(5, 25, "Y:", 15)
+        pyxel.text(5, 35, "Z:", 15)
+        pyxel.text(15, 15,str(numpy.dot(numpy.linalg.inv(ViewMatrix),test_vector)[0])[:4], 1)
+        pyxel.text(15, 25, str(numpy.dot(numpy.linalg.inv(ViewMatrix), test_vector)[1])[:4], 2)
+        pyxel.text(15, 35, str(numpy.dot(numpy.linalg.inv(ViewMatrix), test_vector)[2])[:4], 3)
+
+        pyxel.text(55, 5, "Direction", 15)
+        pyxel.text(55, 15,"X:", 15)
+        pyxel.text(55, 25, "Y:", 15)
+        pyxel.text(55, 35, "Z:", 15)
+        pyxel.text(65, 15,str(numpy.dot(numpy.linalg.inv(ViewMatrix),numpy.array([0,0,-1,0]).T)[0])[:4], 1)
+        pyxel.text(65, 25, str(numpy.dot(numpy.linalg.inv(ViewMatrix), numpy.array([0,0,-1,0]).T)[1])[:4], 2)
+        pyxel.text(65, 35, str(numpy.dot(numpy.linalg.inv(ViewMatrix), numpy.array([0,0,-1,0]).T)[2])[:4], 3)
         triangles=[]
         normals=[]
+        mids=[]
         counter=0
 
 #Projection mode (normal, wide angle, ortographic)
@@ -361,7 +394,8 @@ def quit():
         index=(index+1)%3
     if pyxel.btnp(pyxel.KEY_H):
         print()
-        print(ViewMatrix)
+        print(numpy.dot(numpy.linalg.inv(ViewMatrix),test_vector))
+        print(numpy.dot(numpy.linalg.inv(ViewMatrix),numpy.array([0,0,-1,0]).T))
         print()
     if pyxel.btnp(pyxel.KEY_B):
         mode=(mode+1)%2
