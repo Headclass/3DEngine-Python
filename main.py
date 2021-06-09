@@ -32,6 +32,7 @@ icosahedron=[[0.850651, 0.0, 0.525731], [0.850651, 0.0, -0.525731], [0.525731, 0
 
 cubeMesh=House
 
+
 #Axes (x,y,z)
 axes = [[0, 0, 0],[0.7, 0, 0],[0, 0, 0],[0, 0, 0],[0, 0.7, 0],[0, 0, 0],[0, 0, 0],[0, 0, 0.7],[0, 0, 0]]
 
@@ -67,17 +68,22 @@ def meshChange():
         cubeMesh=icosahedron
 
 #Transforming the object from local space to world space
-def modelToWorld(vertex,x,y,z):
+meshX=0
+meshY=0
+meshZ=0
+def modelToWorld(vertex,x,y,z,axis):
+    global meshX,meshY,meshZ
     xangle = math.radians(x)
     yangle = math.radians(y)
     zangle = math.radians(z)
     xRotationMatrix = numpy.array([[1, 0, 0, 0], [0, math.cos(xangle), -math.sin(xangle), 0], [0, math.sin(xangle), math.cos(xangle), 0],[0, 0, 0, 1]])
     yRotationMatrix = numpy.array([[math.cos(yangle), 0, math.sin(yangle), 0], [0, 1, 0, 0], [-math.sin(yangle), 0, math.cos(yangle), 0],[0, 0, 0, 1]])
     zRotationMatrix = numpy.array([[math.cos(zangle), -math.sin(zangle), 0, 0], [math.sin(zangle), math.cos(zangle), 0, 0], [0, 0, 1, 0],[0, 0, 0, 1]])
-    TranslationMatrix = numpy.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+    TranslationMatrix = numpy.array([[1, 0, 0, meshX], [0, 1, 0, meshY], [0, 0, 1, meshZ], [0, 0, 0, 1]])
     ModelMatrix = numpy.dot(yRotationMatrix, xRotationMatrix)
     ModelMatrix = numpy.dot(zRotationMatrix, ModelMatrix)
-    ModelMatrix = numpy.dot(TranslationMatrix, ModelMatrix)
+    if axis:
+        ModelMatrix = numpy.dot(TranslationMatrix, ModelMatrix)
     return numpy.dot(ModelMatrix,vertex)
 
 
@@ -165,7 +171,7 @@ counter=0
 def rasterize(triangle,color,use,normal,mid):
     global counter
 
-    #Incorrect flat shading / needs rework
+    #Flat shading / dot product of the normal of the triangle and the vector that goes from the middle of the polygon to the camera
     if mode == 1:
         cam_pos=numpy.dot(numpy.linalg.inv(ViewMatrix), test_vector)
         light=cam_pos-mid
@@ -197,10 +203,10 @@ def workTriangle(Triangle,j,color,axis):
         j=0
     if not axis:
         for i in range(3):
-            Triangle[i] = modelToWorld(Triangle[i], 0, j, 0)
+            Triangle[i] = modelToWorld(Triangle[i], 0, j, 0,1)
     else:
         for i in range(3):
-            Triangle[i] = modelToWorld(Triangle[i], 0, 0, 0)
+            Triangle[i] = modelToWorld(Triangle[i], 0, 0, 0,0)
     first = (Triangle[1] - Triangle[0])[:3].T
     second = (Triangle[2] - Triangle[0])[:3].T
     midX=(Triangle[0][0]+Triangle[1][0]+Triangle[2][0])/3
@@ -247,8 +253,8 @@ def workTriangle(Triangle,j,color,axis):
         one=[0,0,0,0]
         two=[0,0,0,0]
 
-        t01=(  -Triangle[(place+1)%3][3]-Triangle[(place+1)%3][2] ) / ( Triangle[place][3] - Triangle[(place+1)%3][3] + Triangle[(place)][2] - Triangle[(place+1)%3][2]  )
-        t02=(  -Triangle[(place+2)%3][3]-Triangle[(place+2)%3][2] ) / ( Triangle[place][3] - Triangle[(place+2)%3][3] + Triangle[(place)][2] - Triangle[(place+2)%3][2]  )
+        t01=(  -Triangle[(place+1)%3][3]-Triangle[(place+1)%3][2] ) / ( Triangle[place][3] - Triangle[(place+1)%3][3] + Triangle[(place)][2] - Triangle[(place+1)%3][2])
+        t02=(  -Triangle[(place+2)%3][3]-Triangle[(place+2)%3][2] ) / ( Triangle[place][3] - Triangle[(place+2)%3][3] + Triangle[(place)][2] - Triangle[(place+2)%3][2])
 
         one[0] = Triangle[(place + 1) % 3][0] + t01*(Triangle[place][0] - Triangle[(place+1)%3][0])
         one[1] = Triangle[(place + 1) % 3][1] + t01*(Triangle[place][1] - Triangle[(place+1)%3][1])
@@ -382,7 +388,7 @@ mesh=0
 def quit():
     if pyxel.btnp(pyxel.KEY_T):
         pyxel.quit()
-    global xcam,ycam,zcam,camXangle,camYangle,camZangle,index,mode,turnedoff,curCamX,curCamY,curCamZ,mesh
+    global xcam,ycam,zcam,camXangle,camYangle,camZangle,index,mode,turnedoff,curCamX,curCamY,curCamZ,mesh,meshX,meshY,meshZ
 
     if pyxel.btn(pyxel.KEY_W):
         zcam+=0.05
@@ -416,8 +422,22 @@ def quit():
         mode=(mode+1)%2
     if pyxel.btnp(pyxel.KEY_C):
         turnedoff=(turnedoff+1)%2
+    if pyxel.btn(pyxel.KEY_KP_4):
+        meshX +=0.05
+    if pyxel.btn(pyxel.KEY_KP_6):
+        meshX -=0.05
+    if pyxel.btn(pyxel.KEY_KP_8):
+        meshZ +=0.05
+    if pyxel.btn(pyxel.KEY_KP_5):
+        meshZ -=0.05
+    if pyxel.btn(pyxel.KEY_KP_7):
+        meshY +=0.05
+    if pyxel.btn(pyxel.KEY_KP_9):
+        meshY -=0.05
 
-pyxel.init(width, height,fps=fps,palette=[0x000000,0xFF0000, 0x00FF00, 0x0000FF, 0x333333, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xAAAAAA, 0xBBBBBB, 0xCCCCCC, 0xDDDDDD, 0xEEEEEE, 0xFFFFFF])
+
+
+pyxel.init(width=width, height=height,fps=fps,caption="3D Engine",palette=[0x000000,0xFF0000, 0x00FF00, 0x0000FF, 0x333333, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xAAAAAA, 0xBBBBBB, 0xCCCCCC, 0xDDDDDD, 0xEEEEEE, 0xFFFFFF])
 
 pyxel.run(update, quit)
 
