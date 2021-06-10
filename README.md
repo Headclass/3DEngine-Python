@@ -19,7 +19,9 @@ Use UO keys to control the roll.
 The object moves along the global axes.
 
 Use 8 and 5 on the numpad to move the mesh along the Z axis.
+
 Use 4 and 6 on the numpad to move the mesh along the X axis.
+
 Use 7 and 9 on the numpad to move the mesh along the X axis.
 
 
