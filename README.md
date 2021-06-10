@@ -15,7 +15,7 @@ Use JL keys to controll the yaw.
 
 Use UO keys to control the roll.
 
-#Moving the object
+# Moving the object
 The object moves along the global axes.
 
 Use 8 and 5 on the numpad to move the mesh along the Z axis.
