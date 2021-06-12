@@ -90,7 +90,7 @@ def updateView():
     camXangle, camYangle, camZangle = 0, 0, 0
 
 ProjectionMatrix = numpy.array([[1.2,0,0,0], [0,1.2,0,0],[0,0,-1.04,-0.41],[0,0,-1,0]])
-
+#ProjectionMatrix = numpy.array([[1,0,0,0], [0,1,0,0],[0,0,1,0],[0,0,-1,0]])
 #Transforming from world space to view space
 def worldToView(vertex):
     global ModelView
