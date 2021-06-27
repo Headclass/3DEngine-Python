@@ -316,7 +316,7 @@ def update():
         global j,triangles, normals,counter,mids
         # An empty triangle
         Triangle = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
-        # Fill the screen with black color (clear it)
+        # Fill the screen with black color
         pyxel.cls(0)
         # Update the view matrix according to the current camera rotation and position
         updateView()
