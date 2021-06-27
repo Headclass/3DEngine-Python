@@ -71,18 +71,22 @@ def meshChange():
 meshX=0
 meshY=0
 meshZ=0
+Scale=1
 def modelToWorld(vertex,x,y,z,axis):
-    global meshX,meshY,meshZ
+    global meshX,meshY,meshZ,Scale
     xangle = math.radians(x)
     yangle = math.radians(y)
     zangle = math.radians(z)
     xRotationMatrix = numpy.array([[1, 0, 0, 0], [0, math.cos(xangle), -math.sin(xangle), 0], [0, math.sin(xangle), math.cos(xangle), 0],[0, 0, 0, 1]])
     yRotationMatrix = numpy.array([[math.cos(yangle), 0, math.sin(yangle), 0], [0, 1, 0, 0], [-math.sin(yangle), 0, math.cos(yangle), 0],[0, 0, 0, 1]])
     zRotationMatrix = numpy.array([[math.cos(zangle), -math.sin(zangle), 0, 0], [math.sin(zangle), math.cos(zangle), 0, 0], [0, 0, 1, 0],[0, 0, 0, 1]])
-    TranslationMatrix = numpy.array([[1, 0, 0, meshX], [0, 1, 0, meshY], [0, 0, 1, meshZ], [0, 0, 0, 1]])
+    TranslationMatrix = numpy.array([[1, 0, 0, meshX], [0, 1, 0, meshY], [0, 0, 1, meshZ], [0, 0,
+                                                                                            0, 1]])
+    ScaleMatrix = numpy.array([[Scale, 0, 0, 0], [0, Scale, 0, 0], [0, 0, Scale, 0], [0, 0, 0, 1]])
     ModelMatrix = numpy.dot(yRotationMatrix, xRotationMatrix)
     ModelMatrix = numpy.dot(zRotationMatrix, ModelMatrix)
     if axis:
+        ModelMatrix = numpy.dot(ScaleMatrix, ModelMatrix)
         ModelMatrix = numpy.dot(TranslationMatrix, ModelMatrix)
     return numpy.dot(ModelMatrix,vertex)
 
@@ -388,7 +392,7 @@ mesh=0
 def quit():
     if pyxel.btnp(pyxel.KEY_T):
         pyxel.quit()
-    global xcam,ycam,zcam,camXangle,camYangle,camZangle,index,mode,turnedoff,curCamX,curCamY,curCamZ,mesh,meshX,meshY,meshZ
+    global xcam,ycam,zcam,camXangle,camYangle,camZangle,index,mode,turnedoff,curCamX,curCamY,curCamZ,mesh,meshX,meshY,meshZ,Scale
 
     if pyxel.btn(pyxel.KEY_W):
         zcam+=0.05
@@ -434,7 +438,10 @@ def quit():
         meshY +=0.05
     if pyxel.btn(pyxel.KEY_KP_9):
         meshY -=0.05
-
+    if pyxel.btn(pyxel.KEY_KP_1):
+        Scale -=0.05
+    if pyxel.btn(pyxel.KEY_KP_3):
+        Scale +=0.05
 
 
 pyxel.init(width=width, height=height,fps=fps,caption="3D Engine",palette=[0x000000,0xFF0000, 0x00FF00, 0x0000FF, 0x333333, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xAAAAAA, 0xBBBBBB, 0xCCCCCC, 0xDDDDDD, 0xEEEEEE, 0xFFFFFF])
