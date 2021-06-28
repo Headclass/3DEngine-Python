@@ -47,19 +47,8 @@ meshZ=0
 size=1
 def modelToWorld(vertex,x,y,z):
     global meshX,meshY,meshZ,size
-    xangle = math.radians(x)
-    yangle = math.radians(y)
-    zangle = math.radians(z)
-    xRotationMatrix = numpy.array([[1, 0, 0, 0], [0, math.cos(xangle), -math.sin(xangle), 0], [0, math.sin(xangle), math.cos(xangle), 0],[0, 0, 0, 1]])
-    yRotationMatrix = numpy.array([[math.cos(yangle), 0, math.sin(yangle), 0], [0, 1, 0, 0], [-math.sin(yangle), 0, math.cos(yangle), 0],[0, 0, 0, 1]])
-    zRotationMatrix = numpy.array([[math.cos(zangle), -math.sin(zangle), 0, 0], [math.sin(zangle), math.cos(zangle), 0, 0], [0, 0, 1, 0],[0, 0, 0, 1]])
-    TranslationMatrix = numpy.array([[1, 0, 0, meshX], [0, 1, 0, meshY], [0, 0, 1, meshZ], [0, 0, 0, 1]])
-    SizeMatrix = numpy.array([[size, 0, 0, 0], [0, size, 0, 0], [0, 0, size, 0], [0, 0, 0, 1]])
-    ModelMatrix = numpy.dot(xRotationMatrix, SizeMatrix)
-    ModelMatrix = numpy.dot(yRotationMatrix, ModelMatrix)
-    ModelMatrix = numpy.dot(zRotationMatrix, ModelMatrix)
-    ModelMatrix = numpy.dot(TranslationMatrix, ModelMatrix)
-    return numpy.dot(ModelMatrix,vertex)
+    TranslationMatrix = numpy.array([[1, 0, 0, 0], [0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 0, 1]])
+    return numpy.dot(TranslationMatrix,vertex)
 
 
 #Global variables for the camera movement
