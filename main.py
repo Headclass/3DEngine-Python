@@ -6,7 +6,7 @@ import pyxel
 #Window dimensions and framerate
 width = 255
 height = 255
-fps=240
+fps=60
 
 #Vertices of the object
 CubeMesh=[
@@ -84,6 +84,8 @@ def viewToClip(vertex):
 #Dividing by W
 def perspectiveDivision(vertex):
     for j in range(4):
+        if vertex[3] < 0.01 and -0.01<vertex[3]:
+            vertex[3] = 0.01
         vertex[j]=vertex[j]/vertex[3]
     return vertex
 
