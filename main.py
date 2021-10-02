@@ -6,7 +6,7 @@ import pyxel
 #Window dimensions and framerate
 width = 255
 height = 255
-fps=60
+fps=240
 
 #Vertices of the object
 CubeMesh=[
@@ -41,10 +41,6 @@ for i in range(len(CubeMesh)):
 
 
 #Transforming the object from local space to world space
-meshX=0
-meshY=0
-meshZ=0
-size=1
 def modelToWorld(vertex,x,y,z):
     global meshX,meshY,meshZ,size
     TranslationMatrix = numpy.array([[1, 0, 0, 0], [0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 0, 1]])
@@ -59,11 +55,6 @@ ViewMatrix = numpy.array([[1, 0, 0, 0],
                           [0, 0, 1, -4],
                           [0, 0, 0, 1]])
 
-test_vector=numpy.array([0,0,0,1]).T
-
-curCamX=0
-curCamY=1
-curCamZ=4
 #Updating the current camera matrix by keyboard inputs
 def updateView():
     global ViewMatrix, xcam, ycam, zcam, camXangle, camYangle, camZangle
@@ -131,7 +122,6 @@ def update():
         pyxel.cls(0)
         # Update the view matrix according to the current camera rotation and position
         updateView()
-
         for i in range(len(CubeMesh)):
             Triangle[i % 3][0] = (CubeMesh[i][0])
             Triangle[i % 3][1] = (CubeMesh[i][1])
@@ -139,29 +129,11 @@ def update():
             Triangle[i % 3][3] = (CubeMesh[i][3])
             if i % 3 == 2:
                 TransformTriangle(Triangle)
-
-        pyxel.text(5, 5, "Location", 15)
-        pyxel.text(5, 15,"X:", 15)
-        pyxel.text(5, 25, "Y:", 15)
-        pyxel.text(5, 35, "Z:", 15)
-        pyxel.text(15, 15,str(numpy.dot(numpy.linalg.inv(ViewMatrix),test_vector)[0])[:4], 1)
-        pyxel.text(15, 25, str(numpy.dot(numpy.linalg.inv(ViewMatrix), test_vector)[1])[:4], 2)
-        pyxel.text(15, 35, str(numpy.dot(numpy.linalg.inv(ViewMatrix), test_vector)[2])[:4], 3)
-
-        pyxel.text(55, 5, "Direction", 15)
-        pyxel.text(55, 15,"X:", 15)
-        pyxel.text(55, 25, "Y:", 15)
-        pyxel.text(55, 35, "Z:", 15)
-        pyxel.text(65, 15,str(numpy.dot(numpy.linalg.inv(ViewMatrix),numpy.array([0,0,-1,0]).T)[0])[:4], 1)
-        pyxel.text(65, 25, str(numpy.dot(numpy.linalg.inv(ViewMatrix), numpy.array([0,0,-1,0]).T)[1])[:4], 2)
-        pyxel.text(65, 35, str(numpy.dot(numpy.linalg.inv(ViewMatrix), numpy.array([0,0,-1,0]).T)[2])[:4], 3)
-
 #Key bindings
 def quit():
+    global xcam,ycam,zcam,camXangle,camYangle,camZangle
     if pyxel.btnp(pyxel.KEY_T):
         pyxel.quit()
-    global xcam,ycam,zcam,camXangle,camYangle,camZangle,index,mode,turnedoff,curCamX,curCamY,curCamZ,mesh,meshX,meshY,meshZ,size
-
     if pyxel.btn(pyxel.KEY_W):
         zcam+=0.05
     if pyxel.btn(pyxel.KEY_S):
@@ -186,22 +158,6 @@ def quit():
         camZangle -= 2
     if pyxel.btn(pyxel.KEY_O):
         camZangle +=2
-    if pyxel.btn(pyxel.KEY_KP_4):
-        meshX +=0.05
-    if pyxel.btn(pyxel.KEY_KP_6):
-        meshX -=0.05
-    if pyxel.btn(pyxel.KEY_KP_8):
-        meshZ +=0.05
-    if pyxel.btn(pyxel.KEY_KP_5):
-        meshZ -=0.05
-    if pyxel.btn(pyxel.KEY_KP_7):
-        meshY +=0.05
-    if pyxel.btn(pyxel.KEY_KP_9):
-        meshY -=0.05
-    if pyxel.btn(pyxel.KEY_KP_3):
-        size +=0.05
-    if pyxel.btn(pyxel.KEY_KP_1):
-        size -=0.05
 
 pyxel.init(width=width, height=height,fps=fps,caption="3D Engine",palette=[0x000000,0xFF0000, 0x00FF00, 0x0000FF, 0x333333, 0x555555, 0x666666, 0x777777, 0x888888, 0x999999, 0xAAAAAA, 0xBBBBBB, 0xCCCCCC, 0xDDDDDD, 0xEEEEEE, 0xFFFFFF])
 
